@@ -51,7 +51,7 @@ export default function Home() {
           </Link>
           
           <nav className="hidden md:flex items-center gap-8">
-            {['Menu', 'Experience', 'Gallery', 'About'].map((item) => (
+            {['Menu', 'Experience', 'About'].map((item) => (
               <a 
                 key={item} 
                 href={`#${item.toLowerCase()}`}
@@ -253,64 +253,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Gallery */}
-      <section id="gallery" className="py-32 bg-background">
-        <div className="container mx-auto px-6">
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeInUp}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-serif mb-4">Atmosphere</h2>
-            <div className="w-12 h-[1px] bg-primary mx-auto" />
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[250px]">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="lg:col-span-2 lg:row-span-2 relative group overflow-hidden"
-            >
-              <img src="/gallery4.png" alt="Atmosphere" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
-            </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="relative group overflow-hidden"
-            >
-              <img src="/gallery1.png" alt="Interior" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
-            </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative group overflow-hidden"
-            >
-              <img src="/gallery2.png" alt="Table Setting" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
-            </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="lg:col-span-2 relative group overflow-hidden"
-            >
-              <img src="/gallery3.png" alt="Sommelier" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
-            </motion.div>
-          </div>
-        </div>
-      </section>
 
       {/* Contact Us */}
       <section id="contact" className="py-0 border-t border-white/5 relative">
