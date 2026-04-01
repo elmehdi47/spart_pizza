@@ -207,7 +207,7 @@ export default function Home() {
             className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8"
           >
             <div className="max-w-xl">
-              <h2 className="text-4xl md:text-5xl font-serif mb-6">{t(language, "sections.experienceTitle")}<span className="italic text-gray-400">{t(language, "sections.experienceTitleItalic")}</span></h2>
+              <h2 className="text-4xl md:text-5xl font-serif mb-6">{t(language, "sections.experienceTitle")}{" "}<span className="italic text-gray-400">{t(language, "sections.experienceTitleItalic")}</span></h2>
               <p className="text-gray-400 font-light leading-relaxed">{t(language, "sections.experienceSub")}</p>
             </div>
           </motion.div>

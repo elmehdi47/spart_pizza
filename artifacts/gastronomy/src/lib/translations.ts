@@ -17,7 +17,7 @@ export const translations = {
       contact: "Contact Us"
     },
     hero: {
-      sub: "A curated journey of flavors, reserved just for you. Only 28 seats per evening.",
+      sub: "Bold flavors. Timeless craft. Every plate a story worth savoring.",
       scroll: "Scroll"
     },
     sections: {
@@ -67,7 +67,7 @@ export const translations = {
       contact: "Contactez-Nous"
     },
     hero: {
-      sub: "Un voyage culinaire unique, réservé pour vous. Seulement 28 couverts par soirée.",
+      sub: "Saveurs audacieuses. Savoir-faire intemporel. Chaque assiette, une histoire à déguster.",
       scroll: "Défiler"
     },
     sections: {
@@ -117,7 +117,7 @@ export const translations = {
       contact: "اتصل بنا"
     },
     hero: {
-      sub: "رحلة فريدة من المذاقات، محجوزة خصيصاً لك. ٢٨ مقعداً فقط كل مساء.",
+      sub: "نكهات جريئة. حرفة خالدة. كل طبق حكاية تستحق التذوق.",
       scroll: "اسحب"
     },
     sections: {

@@ -3,7 +3,14 @@ import { Link, useParams } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { t } from "@/lib/translations";
-import { menuItems } from "@/lib/menuData";
+import { menuItems, menuCategories } from "@/lib/menuData";
+
+const dishImagePositions = [
+  "object-[center_20%]",
+  "object-[center_60%]",
+  "object-[20%_40%]",
+  "object-[80%_40%]",
+];
 
 export default function MenuCategory() {
   const { language, setLanguage } = useLanguage();
@@ -12,6 +19,8 @@ export default function MenuCategory() {
 
   const items = menuItems[slug] || [];
   const categoryName = t(language, `categories.${slug}`);
+  const categoryData = menuCategories.find((c) => c.slug === slug);
+  const categoryImage = categoryData?.image ?? "/hero.png";
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-primary/30 selection:text-primary">
@@ -45,46 +54,53 @@ export default function MenuCategory() {
       </header>
 
       {/* Menu Items */}
-      <main className="container mx-auto px-6 py-16 md:py-24 max-w-5xl">
+      <main className="container mx-auto px-6 py-14 md:py-20 max-w-5xl">
         <motion.div
           initial="hidden"
           animate="visible"
           variants={{
             hidden: { opacity: 0 },
-            visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
+            visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
           }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-5"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
           {items.map((item, idx) => (
             <motion.div
               key={idx}
               variants={{
-                hidden: { opacity: 0, y: 24 },
+                hidden: { opacity: 0, y: 28 },
                 visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
               }}
-              className="group relative flex flex-col gap-4 p-7 rounded-sm
-                bg-white/[0.03] hover:bg-white/[0.06]
-                border-l-2 border-l-primary/40 border-t border-t-white/5 border-r border-r-white/5 border-b border-b-white/5
-                hover:border-l-primary
-                transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+              className="group overflow-hidden rounded-sm
+                bg-white/[0.03] hover:bg-white/[0.055]
+                border border-white/5 hover:border-primary/30
+                transition-all duration-350 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
             >
-              {/* Name & Price Row */}
-              <div className="flex items-start justify-between gap-4">
-                <h3 className="font-serif text-xl font-semibold text-white leading-tight group-hover:text-white/95 transition-colors">
-                  {item.names[language]}
-                </h3>
-                <span className="font-serif text-lg font-medium text-primary shrink-0 mt-0.5">
+              {/* Image */}
+              <div className="relative h-44 overflow-hidden">
+                <img
+                  src={categoryImage}
+                  alt={item.names.en}
+                  className={`w-full h-full object-cover ${dishImagePositions[idx % dishImagePositions.length]}
+                    transition-transform duration-700 group-hover:scale-105`}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d0d] via-black/30 to-transparent" />
+                {/* Price badge floating on image */}
+                <span className="absolute top-3 right-3 font-serif text-sm font-semibold text-white bg-primary/90 px-3 py-1 rounded-sm backdrop-blur-sm">
                   {item.price}
                 </span>
               </div>
 
-              {/* Separator */}
-              <div className="h-[1px] bg-gradient-to-r from-primary/30 via-white/10 to-transparent" />
-
-              {/* Description */}
-              <p className="font-sans text-sm font-light text-gray-400 leading-relaxed">
-                {item.description}
-              </p>
+              {/* Content */}
+              <div className="p-6 flex flex-col gap-3">
+                <h3 className="font-serif text-xl font-semibold text-white leading-snug group-hover:text-white/95 transition-colors">
+                  {item.names[language]}
+                </h3>
+                <div className="h-[1px] bg-gradient-to-r from-primary/40 via-white/10 to-transparent" />
+                <p className="font-sans text-sm font-light text-gray-400 leading-relaxed">
+                  {item.description}
+                </p>
+              </div>
             </motion.div>
           ))}
         </motion.div>
