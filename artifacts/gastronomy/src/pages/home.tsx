@@ -1,13 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { Calendar, Clock, Users, ChevronRight, MapPin, Instagram, Twitter, Facebook, GlassWater, ChefHat, Utensils, Star } from "lucide-react";
+import { Calendar, Clock, Users, ChevronRight, MapPin, Instagram, Twitter, Facebook, GlassWater, ChefHat, Utensils, Star, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { t } from "@/lib/translations";
 import { menuCategories } from "@/lib/menuData";
+import { useToast } from "@/hooks/use-toast";
 
 // Animation Variants
 const fadeInUp = {
@@ -28,6 +29,43 @@ export default function Home() {
   const [navScrolled, setNavScrolled] = useState(false);
   const { language, setLanguage } = useLanguage();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  const [formName, setFormName] = useState("");
+  const [formEmail, setFormEmail] = useState("");
+  const [formPhone, setFormPhone] = useState("");
+  const [formMessage, setFormMessage] = useState("");
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [formSuccess, setFormSuccess] = useState(false);
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formName.trim() || !formEmail.trim()) {
+      toast({ title: "Required fields", description: "Please enter your name and email.", variant: "destructive" });
+      return;
+    }
+    setFormSubmitting(true);
+    try {
+      const r = await fetch("/api/admin/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: formName,
+          customerEmail: formEmail,
+          customerPhone: formPhone || undefined,
+          message: formMessage || undefined,
+        }),
+      });
+      if (!r.ok) throw new Error();
+      setFormSuccess(true);
+      setFormName(""); setFormEmail(""); setFormPhone(""); setFormMessage("");
+      toast({ title: "Request sent", description: "We will be in touch with you shortly." });
+      setTimeout(() => setFormSuccess(false), 5000);
+    } catch {
+      toast({ title: "Error", description: "Could not send your request. Please try again.", variant: "destructive" });
+    }
+    setFormSubmitting(false);
+  };
   
   // Parallax effects
   const heroY = useTransform(scrollY, [0, 1000], [0, 250]);
@@ -287,23 +325,37 @@ export default function Home() {
               <h2 className="text-3xl font-serif mb-2 text-white">{t(language, "sections.contactTitle")}</h2>
               <p className="text-sm text-gray-400 mb-10 font-light">{t(language, "sections.contactSub")}</p>
               
-              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-widest text-gray-500">{t(language, "form.name")}</label>
-                  <Input className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white" />
+              {formSuccess ? (
+                <div className="py-12 text-center">
+                  <div className="w-12 h-12 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center mx-auto mb-4">
+                    <span className="text-primary text-xl">✓</span>
+                  </div>
+                  <p className="text-white font-serif text-lg mb-2">Request received</p>
+                  <p className="text-gray-400 text-sm font-light">We will be in touch with you shortly.</p>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-widest text-gray-500">{t(language, "form.email")}</label>
-                  <Input type="email" className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-widest text-gray-500">{t(language, "form.requests")}</label>
-                  <Textarea className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white resize-none min-h-[80px]" />
-                </div>
-                <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-none py-6 font-medium tracking-widest uppercase text-xs mt-4 gold-glow">
-                  {t(language, "sections.submitRequest")}
-                </Button>
-              </form>
+              ) : (
+                <form className="space-y-6" onSubmit={handleFormSubmit}>
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-widest text-gray-500">{t(language, "form.name")}</label>
+                    <Input value={formName} onChange={e => setFormName(e.target.value)} required className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-widest text-gray-500">{t(language, "form.email")}</label>
+                    <Input type="email" value={formEmail} onChange={e => setFormEmail(e.target.value)} required className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-widest text-gray-500">Phone (optional)</label>
+                    <Input value={formPhone} onChange={e => setFormPhone(e.target.value)} className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-widest text-gray-500">{t(language, "form.requests")}</label>
+                    <Textarea value={formMessage} onChange={e => setFormMessage(e.target.value)} className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white resize-none min-h-[80px]" />
+                  </div>
+                  <Button disabled={formSubmitting} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-none py-6 font-medium tracking-widest uppercase text-xs mt-4 gold-glow">
+                    {formSubmitting ? "Sending..." : t(language, "sections.submitRequest")}
+                  </Button>
+                </form>
+              )}
             </motion.div>
           </div>
           
@@ -324,7 +376,7 @@ export default function Home() {
             <div className="relative z-10 p-8 lg:p-24 flex flex-col h-full bg-black/65 backdrop-blur-[2px]">
               <div className="mt-auto">
                 <h3 className="text-2xl font-serif text-white mb-8">Spart</h3>
-                <ul className="space-y-6 text-gray-300 font-light text-sm">
+                <ul className="space-y-6 text-gray-300 font-light text-sm mb-8">
                   <li className="flex items-start">
                     <MapPin className="w-5 h-5 text-primary mr-4 mt-0.5 shrink-0" />
                     <a href="https://maps.app.goo.gl/xbVaWq3dKPK9g5sHA" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
@@ -338,6 +390,23 @@ export default function Home() {
                     <a href="tel:0791943137" className="hover:text-primary transition-colors">0791943137</a>
                   </li>
                 </ul>
+
+                {/* Google Maps CTA */}
+                <a
+                  href="https://maps.app.goo.gl/xbVaWq3dKPK9g5sHA"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 p-4 border border-white/10 hover:border-primary/50 bg-white/[0.04] hover:bg-white/[0.07] transition-all duration-300 group"
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0 group-hover:bg-primary/25 transition-colors">
+                    <Navigation className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-white font-medium mb-0.5">Open in Google Maps</p>
+                    <p className="text-xs text-gray-500 font-light">Get directions to SPART</p>
+                  </div>
+                  <svg className="w-4 h-4 text-gray-600 group-hover:text-primary transition-colors ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </a>
               </div>
             </div>
           </div>

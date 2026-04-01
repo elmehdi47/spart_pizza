@@ -91,6 +91,19 @@ Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used b
 
 Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
 
+### `artifacts/gastronomy` (`@workspace/gastronomy`)
+
+React + Vite luxury restaurant landing page for SPART (Bordj Bou Arreridj, Algeria).
+
+- Dark/orange aesthetic, cinematic sections, glassmorphic components
+- Multi-language: EN / FR / AR (context in `src/contexts/LanguageContext.tsx`, strings in `src/lib/translations.ts`)
+- Multi-page menu: home category grid → `/menu/:slug` → dish cards with food photos
+- Contact form submits reservation requests to `POST /api/admin/orders`
+- Google Maps box widget links to restaurant location
+- Admin panel at `/admin` — manages media, menu items, orders
+- Vite proxy: `/api` → `http://localhost:8080` (API server)
+- Assets: `/spart-logo.jpg`, `/hero.png`, `/category-*.png`
+
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.

@@ -1,20 +1,33 @@
-// Export your models here. Add one export per file
-// export * from "./posts";
-//
-// Each model/table should ideally be split into different files.
-// Each model/table should define a Drizzle table, insert schema, and types:
-//
-//   import { pgTable, text, serial } from "drizzle-orm/pg-core";
-//   import { createInsertSchema } from "drizzle-zod";
-//   import { z } from "zod/v4";
-//
-//   export const postsTable = pgTable("posts", {
-//     id: serial("id").primaryKey(),
-//     title: text("title").notNull(),
-//   });
-//
-//   export const insertPostSchema = createInsertSchema(postsTable).omit({ id: true });
-//   export type InsertPost = z.infer<typeof insertPostSchema>;
-//   export type Post = typeof postsTable.$inferSelect;
+import { pgTable, serial, varchar, text, integer, timestamp } from "drizzle-orm/pg-core";
 
-export {}
+export const mediaSettings = pgTable("media_settings", {
+  id: serial("id").primaryKey(),
+  slot: varchar("slot", { length: 50 }).unique().notNull(),
+  imageUrl: text("image_url").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const menuItems = pgTable("menu_items", {
+  id: serial("id").primaryKey(),
+  category: varchar("category", { length: 50 }).notNull(),
+  nameEn: varchar("name_en", { length: 255 }).notNull(),
+  nameFr: varchar("name_fr", { length: 255 }).notNull(),
+  nameAr: varchar("name_ar", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  price: varchar("price", { length: 50 }).notNull(),
+  imageUrl: text("image_url"),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const orders = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  customerName: varchar("customer_name", { length: 255 }).notNull(),
+  customerEmail: varchar("customer_email", { length: 255 }).notNull(),
+  customerPhone: varchar("customer_phone", { length: 50 }),
+  message: text("message"),
+  status: varchar("status", { length: 50 }).default("pending"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
