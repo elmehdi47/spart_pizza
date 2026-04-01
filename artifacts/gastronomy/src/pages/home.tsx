@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { Calendar, Clock, Users, ChevronRight, MapPin, Instagram, Twitter, Facebook, GlassWater, ChefHat, Utensils, Star, Navigation } from "lucide-react";
+import { Calendar, Clock, Users, ChevronRight, MapPin, Instagram, GlassWater, ChefHat, Utensils, Star, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -429,14 +429,8 @@ export default function Home() {
             <span className="text-3xl font-serif font-bold tracking-widest text-white">SPART</span>
           </div>
           <div className="flex gap-6 mb-12">
-            <a href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:text-primary hover:border-primary transition-colors">
+            <a href="https://www.instagram.com/spartepizza?igsh=MWNkOXZocWdjaWpodA==" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:text-primary hover:border-primary transition-colors">
               <Instagram className="w-4 h-4" />
-            </a>
-            <a href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:text-primary hover:border-primary transition-colors">
-              <Twitter className="w-4 h-4" />
-            </a>
-            <a href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:text-primary hover:border-primary transition-colors">
-              <Facebook className="w-4 h-4" />
             </a>
           </div>
           <div className="text-xs uppercase tracking-widest text-gray-600 flex flex-col md:flex-row gap-4 md:gap-8 items-center">
