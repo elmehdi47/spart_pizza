@@ -1,10 +1,13 @@
 import { useEffect, useState, useRef } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Calendar, Clock, Users, ChevronRight, MapPin, Instagram, Twitter, Facebook, GlassWater, ChefHat, Utensils, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { t } from "@/lib/translations";
+import { menuCategories } from "@/lib/menuData";
 
 // Animation Variants
 const fadeInUp = {
@@ -23,6 +26,8 @@ const staggerContainer = {
 export default function Home() {
   const { scrollY } = useScroll();
   const [navScrolled, setNavScrolled] = useState(false);
+  const { language, setLanguage } = useLanguage();
+  const [, setLocation] = useLocation();
   
   // Parallax effects
   const heroY = useTransform(scrollY, [0, 1000], [0, 250]);
@@ -71,12 +76,36 @@ export default function Home() {
               )
             ))}
           </nav>
-          
-          <a href="#contact" className="hidden md:flex">
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-none px-8 font-medium tracking-wide uppercase text-xs gold-glow">
-              Contact Us
-            </Button>
-          </a>
+
+          <div className="hidden md:flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm tracking-widest font-medium">
+              <button
+                onClick={() => setLanguage("en")}
+                className={`transition-colors ${language === "en" ? "text-primary" : "text-gray-500 hover:text-white"}`}
+              >
+                EN
+              </button>
+              <span className="text-gray-700">|</span>
+              <button
+                onClick={() => setLanguage("fr")}
+                className={`transition-colors ${language === "fr" ? "text-primary" : "text-gray-500 hover:text-white"}`}
+              >
+                FR
+              </button>
+              <span className="text-gray-700">|</span>
+              <button
+                onClick={() => setLanguage("ar")}
+                className={`transition-colors ${language === "ar" ? "text-primary" : "text-gray-500 hover:text-white"}`}
+              >
+                AR
+              </button>
+            </div>
+            <a href="#contact">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-none px-8 font-medium tracking-wide uppercase text-xs gold-glow">
+                Contact Us
+              </Button>
+            </a>
+          </div>
         </div>
       </header>
 
@@ -128,7 +157,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* Signature Plates */}
+      {/* Our Menu */}
       <section id="menu" className="py-32 relative">
         <div className="container mx-auto px-6">
           <motion.div 
@@ -138,43 +167,48 @@ export default function Home() {
             variants={fadeInUp}
             className="text-center mb-20"
           >
-            <h2 className="text-4xl md:text-5xl font-serif mb-4">Signature <span className="italic text-gray-400">Plates</span></h2>
+            <h2 className="text-4xl md:text-5xl font-serif mb-4">Our <span className="italic text-gray-400">Menu</span></h2>
             <div className="w-12 h-[1px] bg-primary mx-auto mb-6" />
             <p className="text-gray-400 max-w-2xl mx-auto font-light">Each dish is a masterpiece, crafted with precision, seasonal ingredients, and bound by culinary tradition.</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { img: "/dish1.png", name: "A5 Wagyu Reserve", desc: "Smoked bone marrow, black garlic emulsion" },
-              { img: "/dish2.png", name: "Foie Gras Terrine", desc: "Gold leaf, fig compote, brioche" },
-              { img: "/dish3.png", name: "The Sphere", desc: "Valrhona dark chocolate, warm crème anglaise" },
-              { img: "/dish4.png", name: "Ocean's Bounty", desc: "Premium oysters, oscietra caviar, champagne foam" }
-            ].map((dish, i) => (
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={staggerContainer}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
+            {menuCategories.map((category, i) => (
               <motion.div
-                key={i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-50px" }}
+                key={category.id}
                 variants={{
                   hidden: { opacity: 0, y: 30 },
                   visible: { opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.6 } }
                 }}
-                className="group relative overflow-hidden bg-zinc-900 rounded-none cursor-pointer"
+                onClick={() => setLocation(`/menu/${category.slug}`)}
+                className="group relative overflow-hidden cursor-pointer border border-transparent hover:border-primary/50 transition-colors duration-500"
+                style={{ aspectRatio: "16/9" }}
               >
-                <div className="aspect-square overflow-hidden">
+                <div className="absolute inset-0">
                   <img 
-                    src={dish.img} 
-                    alt={dish.name} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100"
+                    src={category.image}
+                    alt={t(language, `categories.${category.id}`)}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                  <h3 className="font-serif text-xl text-white mb-1 group-hover:text-primary transition-colors">{dish.name}</h3>
-                  <p className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">{dish.desc}</p>
+                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-colors duration-500" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+                  <h3 className="text-3xl md:text-4xl font-serif text-primary mb-3 drop-shadow-md">
+                    {t(language, `categories.${category.id}`)}
+                  </h3>
+                  <span className="text-xs uppercase tracking-widest text-white/80 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                    Explore →
+                  </span>
                 </div>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 

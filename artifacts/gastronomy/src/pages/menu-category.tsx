@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link, useParams } from "wouter";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { t } from "@/lib/translations";
 import { menuItems } from "@/lib/menuData";
@@ -22,9 +22,12 @@ export default function MenuCategory() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-primary/30 selection:text-primary">
-      <header className="sticky top-0 z-50 py-6 px-6 md:px-12 flex items-center justify-between glass-panel border-b border-white/5">
-        <Link href="/menu" className="text-sm text-gray-400 hover:text-white transition-colors">
-          {t(language, "navBack")}
+      <header className="sticky top-0 z-50 py-5 px-6 md:px-12 flex items-center justify-between glass-panel border-b border-white/5">
+        <Link href="/menu">
+          <button className="flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-widest font-medium border border-white/15 text-gray-300 hover:border-primary/50 hover:text-primary transition-all duration-300">
+            <ArrowLeft className="w-3.5 h-3.5" />
+            {t(language, "navBack").replace("← ", "")}
+          </button>
         </Link>
         <div className="text-xl md:text-2xl font-serif tracking-wide text-primary capitalize">
           {categoryName}
