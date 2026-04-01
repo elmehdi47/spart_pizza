@@ -62,9 +62,11 @@ export default function Home() {
             ))}
           </nav>
           
-          <Button className="hidden md:flex bg-primary hover:bg-primary/90 text-primary-foreground rounded-none px-8 font-medium tracking-wide uppercase text-xs gold-glow">
-            Book a Table
-          </Button>
+          <a href="#contact" className="hidden md:flex">
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-none px-8 font-medium tracking-wide uppercase text-xs gold-glow">
+              Contact Us
+            </Button>
+          </a>
         </div>
       </header>
 
@@ -102,42 +104,6 @@ export default function Home() {
             </p>
           </motion.div>
 
-          {/* Reservation Bar */}
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.4 }}
-            className="glass-panel p-2 rounded-full flex flex-col md:flex-row items-center gap-2 max-w-4xl w-full"
-          >
-            <div className="flex items-center flex-1 bg-black/40 rounded-full px-4 py-2 w-full border border-white/5 focus-within:border-primary/50 transition-colors">
-              <Calendar className="w-5 h-5 text-primary mr-3" />
-              <input type="date" className="bg-transparent border-none outline-none text-white w-full text-sm placeholder:text-gray-500 uppercase tracking-widest cursor-pointer color-scheme-dark" />
-            </div>
-            <div className="flex items-center flex-1 bg-black/40 rounded-full px-4 py-2 w-full border border-white/5 focus-within:border-primary/50 transition-colors">
-              <Clock className="w-5 h-5 text-primary mr-3" />
-              <select className="bg-transparent border-none outline-none text-white w-full text-sm uppercase tracking-widest appearance-none cursor-pointer">
-                <option value="" disabled selected>Time</option>
-                <option value="19:00">19:00</option>
-                <option value="19:30">19:30</option>
-                <option value="20:00">20:00</option>
-                <option value="20:30">20:30</option>
-              </select>
-            </div>
-            <div className="flex items-center flex-1 bg-black/40 rounded-full px-4 py-2 w-full border border-white/5 focus-within:border-primary/50 transition-colors">
-              <Users className="w-5 h-5 text-primary mr-3" />
-              <select className="bg-transparent border-none outline-none text-white w-full text-sm uppercase tracking-widest appearance-none cursor-pointer">
-                <option value="" disabled selected>Party</option>
-                <option value="1">1 Guest</option>
-                <option value="2">2 Guests</option>
-                <option value="3">3 Guests</option>
-                <option value="4">4 Guests</option>
-                <option value="5+">5+ Guests</option>
-              </select>
-            </div>
-            <Button className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8 py-6 font-medium tracking-widest uppercase text-xs gold-glow">
-              Find Table
-            </Button>
-          </motion.div>
         </div>
         
         {/* Scroll indicator */}
@@ -346,8 +312,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Concierge / Contact */}
-      <section className="py-0 border-t border-white/5 relative">
+      {/* Contact Us */}
+      <section id="contact" className="py-0 border-t border-white/5 relative">
         <div className="flex flex-col lg:flex-row min-h-[80vh]">
           {/* Form Side */}
           <div className="w-full lg:w-1/2 p-8 lg:p-24 bg-zinc-950 flex flex-col justify-center relative z-10">
@@ -358,7 +324,7 @@ export default function Home() {
               variants={fadeInUp}
               className="max-w-md w-full mx-auto lg:mx-0"
             >
-              <h2 className="text-3xl font-serif mb-2 text-white">Concierge</h2>
+              <h2 className="text-3xl font-serif mb-2 text-white">Contact Us</h2>
               <p className="text-sm text-gray-400 mb-10 font-light">Request a reservation or inquire about private events.</p>
               
               <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
