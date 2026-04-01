@@ -51,29 +51,20 @@ export default function Home() {
         }`}
       >
         <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-serif font-bold tracking-widest text-white hover:text-primary transition-colors">
-            AURUM
+          <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+            <img src="/spart-logo.jpg" alt="Spart" className="h-10 w-10 rounded-full object-cover" />
+            <span className="text-xl font-serif font-bold tracking-widest text-white">SPART</span>
           </Link>
           
           <nav className="hidden md:flex items-center gap-8">
             {['Menu', 'Experience', 'About'].map((item) => (
-              item === 'Menu' ? (
-                <Link
-                  key={item}
-                  href="/menu"
-                  className="text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors"
-                >
-                  {item}
-                </Link>
-              ) : (
-                <a 
-                  key={item} 
-                  href={`#${item.toLowerCase()}`}
-                  className="text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors"
-                >
-                  {item}
-                </a>
-              )
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                className="text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors"
+              >
+                {item}
+              </a>
             ))}
           </nav>
 
@@ -224,7 +215,7 @@ export default function Home() {
           >
             <div className="max-w-xl">
               <h2 className="text-4xl md:text-5xl font-serif mb-6">The <span className="italic text-gray-400">Experience</span></h2>
-              <p className="text-gray-400 font-light leading-relaxed">Beyond the dining room, Aurum offers tailored experiences for those seeking deeper immersion into the culinary arts.</p>
+              <p className="text-gray-400 font-light leading-relaxed">Beyond the dining room, Spart offers tailored experiences for those seeking deeper immersion into the culinary arts.</p>
             </div>
           </motion.div>
 
@@ -248,10 +239,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <exp.icon className="w-10 h-10 text-primary mb-6 stroke-[1px]" />
                 <h3 className="text-2xl font-serif mb-4 text-white">{exp.title}</h3>
-                <p className="text-gray-400 font-light leading-relaxed text-sm mb-8">{exp.desc}</p>
-                <button className="flex items-center text-xs uppercase tracking-widest text-primary font-medium hover:text-white transition-colors">
-                  Discover More <ChevronRight className="w-4 h-4 ml-1" />
-                </button>
+                <p className="text-gray-400 font-light leading-relaxed text-sm">{exp.desc}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -279,19 +267,16 @@ export default function Home() {
             >
               <div className="w-12 h-[1px] bg-primary mb-8" />
               <h2 className="text-4xl md:text-5xl font-serif mb-8 text-white">
-                Chef <span className="italic text-gray-400">Marco Laurent</span>
+                Our <span className="italic text-gray-400">Story</span>
               </h2>
-              <div className="space-y-6 text-gray-400 font-light leading-relaxed mb-12">
+              <div className="space-y-6 text-gray-400 font-light leading-relaxed">
                 <p>
                   "Cooking is not just about combining ingredients. It is about capturing a moment in time, an emotion, a memory, and presenting it on a plate."
                 </p>
                 <p>
-                  Trained in the finest kitchens across Paris, Tokyo, and San Sebastián, Chef Laurent brings a worldly perspective to classic French techniques. At Aurum, every detail is orchestrated to challenge expectations and delight the senses.
+                  Born in the heart of Bordj Bou Arreridj, Spart is a celebration of bold flavors and Algerian warmth. Every dish is crafted with precision, passion, and a commitment to quality that rivals the finest establishments.
                 </p>
               </div>
-              <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground rounded-none uppercase tracking-widest text-xs px-8 py-6">
-                Read Our Story
-              </Button>
             </motion.div>
           </div>
         </div>
@@ -322,21 +307,6 @@ export default function Home() {
                   <label className="text-xs uppercase tracking-widest text-gray-500">Email</label>
                   <Input type="email" className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white" />
                 </div>
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest text-gray-500">Date</label>
-                    <Input type="date" className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white color-scheme-dark" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest text-gray-500">Guests</label>
-                    <select className="w-full bg-transparent border-0 border-b border-white/10 rounded-none px-0 py-2 focus:ring-0 focus:border-primary text-white text-sm outline-none appearance-none cursor-pointer">
-                      <option className="bg-zinc-900 text-white" value="1">1 Person</option>
-                      <option className="bg-zinc-900 text-white" value="2">2 People</option>
-                      <option className="bg-zinc-900 text-white" value="3">3 People</option>
-                      <option className="bg-zinc-900 text-white" value="4">4 People</option>
-                    </select>
-                  </div>
-                </div>
                 <div className="space-y-2">
                   <label className="text-xs uppercase tracking-widest text-gray-500">Special Requests</label>
                   <Textarea className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white resize-none min-h-[80px]" />
@@ -350,35 +320,32 @@ export default function Home() {
           
           {/* Info Side */}
           <div className="w-full lg:w-1/2 relative bg-zinc-900 flex flex-col justify-between">
-            <div className="absolute inset-0 opacity-40 mix-blend-overlay pointer-events-none grayscale">
-               {/* Decorative background or iframe */}
+            <div className="absolute inset-0 pointer-events-none">
                <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.4754592471676!2d2.329241515674712!3d48.86821217928833!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e66e31bd6e4aeb%3A0xc34a0210f135b546!2s14%20Rue%20de%20la%20Paix%2C%2075002%20Paris%2C%20France!5e0!3m2!1sen!2sus!4v1620000000000!5m2!1sen!2sus" 
+                src="https://maps.google.com/maps?q=Bd+Remache+Aissa,+Bordj+Bou+Arreridj+34000,Algeria&output=embed&z=15" 
                 width="100%" 
                 height="100%" 
-                style={{ border: 0, filter: "invert(100%) contrast(120%) brightness(50%)" }} 
+                style={{ border: 0, filter: "invert(90%) hue-rotate(180deg) saturate(0.3) brightness(0.4)" }} 
                 allowFullScreen={false} 
                 loading="lazy"
               ></iframe>
             </div>
             
-            <div className="relative z-10 p-8 lg:p-24 flex flex-col h-full bg-black/60 backdrop-blur-[2px]">
+            <div className="relative z-10 p-8 lg:p-24 flex flex-col h-full bg-black/65 backdrop-blur-[2px]">
               <div className="mt-auto">
-                <h3 className="text-2xl font-serif text-white mb-8">Aurum</h3>
+                <h3 className="text-2xl font-serif text-white mb-8">Spart</h3>
                 <ul className="space-y-6 text-gray-300 font-light text-sm">
                   <li className="flex items-start">
                     <MapPin className="w-5 h-5 text-primary mr-4 mt-0.5 shrink-0" />
-                    <span>14 Rue de la Paix<br/>75002 Paris, France</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Clock className="w-5 h-5 text-primary mr-4 mt-0.5 shrink-0" />
-                    <span>Tuesday – Saturday<br/>19:00 – 23:00</span>
+                    <a href="https://maps.app.goo.gl/xbVaWq3dKPK9g5sHA" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                      station Mounia, Bd Remache Aissa<br/>Bordj Bou Arreridj 34000
+                    </a>
                   </li>
                   <li className="flex items-center">
                     <div className="w-5 h-5 flex items-center justify-center mr-4 shrink-0">
                       <div className="w-2 h-2 rounded-full bg-primary" />
                     </div>
-                    <span>Reservations: +33 1 42 60 88 88<br/>reservations@aurum-paris.com</span>
+                    <a href="tel:0791943137" className="hover:text-primary transition-colors">0791943137</a>
                   </li>
                 </ul>
               </div>
@@ -390,8 +357,9 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-black py-16 border-t border-white/5">
         <div className="container mx-auto px-6 flex flex-col items-center">
-          <div className="text-3xl font-serif font-bold tracking-widest text-white mb-8">
-            AURUM
+          <div className="flex items-center gap-3 mb-8">
+            <img src="/spart-logo.jpg" alt="Spart" className="h-12 w-12 rounded-full object-cover" />
+            <span className="text-3xl font-serif font-bold tracking-widest text-white">SPART</span>
           </div>
           <div className="flex gap-6 mb-12">
             <a href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:text-primary hover:border-primary transition-colors">
@@ -405,7 +373,7 @@ export default function Home() {
             </a>
           </div>
           <div className="text-xs uppercase tracking-widest text-gray-600 flex flex-col md:flex-row gap-4 md:gap-8 items-center">
-            <span>© {new Date().getFullYear()} Aurum Restaurant.</span>
+            <span>© {new Date().getFullYear()} Spart Restaurant.</span>
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
           </div>

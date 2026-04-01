@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
-import Menu from "@/pages/menu";
 import MenuCategory from "@/pages/menu-category";
 import { useEffect } from "react";
 
@@ -15,7 +14,6 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/menu" component={Menu} />
       <Route path="/menu/:slug" component={MenuCategory} />
       <Route component={NotFound} />
     </Switch>

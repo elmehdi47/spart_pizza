@@ -18,7 +18,7 @@ export default function MenuCategory() {
 
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 py-5 px-6 md:px-12 flex items-center justify-between glass-panel border-b border-white/5">
-        <Link href="/menu">
+        <Link href="/#menu">
           <button className="flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-widest font-medium border border-white/15 text-gray-300 hover:border-primary/50 hover:text-primary transition-all duration-300">
             <ArrowLeft className="w-3.5 h-3.5" />
             {t(language, "navBack").replace("← ", "").replace(" ←", "")}

@@ -69,18 +69,18 @@
   --popover: 0 0% 7%;
   --popover-foreground: 0 0% 95%;
   --popover-border: 0 0% 15%;
-  --primary: 43 74% 49%; /* Aurum Gold #C9A84C roughly */
+  --primary: 27 80% 52%; /* Spart Orange #E07A27 */
   --primary-foreground: 0 0% 9%;
   --secondary: 0 0% 12%;
   --secondary-foreground: 0 0% 95%;
   --muted: 0 0% 15%;
   --muted-foreground: 0 0% 60%;
-  --accent: 43 74% 49%;
+  --accent: 27 80% 52%;
   --accent-foreground: 0 0% 9%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 95%;
   --input: 0 0% 15%;
-  --ring: 43 74% 49%;
+  --ring: 27 80% 52%;
   --radius: 0.25rem;
 
   --chart-1: 43 74% 49%;
@@ -120,19 +120,19 @@ html {
 }
 
 .gold-text-gradient {
-  background: linear-gradient(135deg, #D4AF37 0%, #C9A84C 50%, #B8961E 100%);
+  background: linear-gradient(135deg, #E07A27 0%, #D4691A 50%, #C25E14 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gold-glow {
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+  box-shadow: 0 0 20px rgba(224, 122, 39, 0.2);
   transition: box-shadow 0.3s ease;
 }
 
 .gold-glow:hover {
-  box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 0 30px rgba(224, 122, 39, 0.4);
 }
 
 .glass-panel {
