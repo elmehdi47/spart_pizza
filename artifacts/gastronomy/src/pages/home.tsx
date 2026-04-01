@@ -57,15 +57,9 @@ export default function Home() {
           </Link>
           
           <nav className="hidden md:flex items-center gap-8">
-            {['Menu', 'Experience', 'About'].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                className="text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors"
-              >
-                {item}
-              </a>
-            ))}
+            <a href="#menu" className="text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors">{t(language, "nav.menu")}</a>
+            <a href="#experience" className="text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors">{t(language, "nav.experience")}</a>
+            <a href="#about" className="text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors">{t(language, "nav.about")}</a>
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
@@ -93,7 +87,7 @@ export default function Home() {
             </div>
             <a href="#contact">
               <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-none px-8 font-medium tracking-wide uppercase text-xs gold-glow">
-                Contact Us
+                {t(language, "nav.contact")}
               </Button>
             </a>
           </div>
@@ -129,8 +123,7 @@ export default function Home() {
               Taste the <span className="gold-text-gradient italic">Extraordinary.</span>
             </h1>
             <p className="text-lg md:text-xl text-gray-300 font-light mb-12 max-w-2xl mx-auto tracking-wide">
-              A curated journey of flavors, reserved just for you. 
-              Only 28 seats per evening.
+              {t(language, "hero.sub")}
             </p>
           </motion.div>
 
@@ -158,9 +151,9 @@ export default function Home() {
             variants={fadeInUp}
             className="text-center mb-20"
           >
-            <h2 className="text-4xl md:text-5xl font-serif mb-4">Our <span className="italic text-gray-400">Menu</span></h2>
+            <h2 className="text-4xl md:text-5xl font-serif mb-4">{t(language, "sections.menuTitle")} <span className="italic text-gray-400">{t(language, "sections.menuTitleItalic")}</span></h2>
             <div className="w-12 h-[1px] bg-primary mx-auto mb-6" />
-            <p className="text-gray-400 max-w-2xl mx-auto font-light">Each dish is a masterpiece, crafted with precision, seasonal ingredients, and bound by culinary tradition.</p>
+            <p className="text-gray-400 max-w-2xl mx-auto font-light">{t(language, "sections.menuSub")}</p>
           </motion.div>
 
           <motion.div
@@ -214,8 +207,8 @@ export default function Home() {
             className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8"
           >
             <div className="max-w-xl">
-              <h2 className="text-4xl md:text-5xl font-serif mb-6">The <span className="italic text-gray-400">Experience</span></h2>
-              <p className="text-gray-400 font-light leading-relaxed">Beyond the dining room, Spart offers tailored experiences for those seeking deeper immersion into the culinary arts.</p>
+              <h2 className="text-4xl md:text-5xl font-serif mb-6">{t(language, "sections.experienceTitle")}<span className="italic text-gray-400">{t(language, "sections.experienceTitleItalic")}</span></h2>
+              <p className="text-gray-400 font-light leading-relaxed">{t(language, "sections.experienceSub")}</p>
             </div>
           </motion.div>
 
@@ -227,9 +220,9 @@ export default function Home() {
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
             {[
-              { icon: Users, title: "Private Dining", desc: "An exclusive room for up to 12 guests, featuring a dedicated sommelier and a customized tasting menu." },
-              { icon: ChefHat, title: "Chef's Table", desc: "Sit front row to the kitchen action. Interact with Chef Laurent as he prepares an unscripted menu." },
-              { icon: GlassWater, title: "Sommelier Selection", desc: "A curated journey through our 2,000-bottle cellar, pairing rare vintages with our signature courses." }
+              { icon: Users, titleKey: "experiences.privateDiningTitle", descKey: "experiences.privateDiningDesc" },
+              { icon: ChefHat, titleKey: "experiences.chefsTableTitle", descKey: "experiences.chefsTableDesc" },
+              { icon: GlassWater, titleKey: "experiences.sommelierTitle", descKey: "experiences.sommelierDesc" }
             ].map((exp, i) => (
               <motion.div
                 key={i}
@@ -238,8 +231,8 @@ export default function Home() {
               >
                 <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <exp.icon className="w-10 h-10 text-primary mb-6 stroke-[1px]" />
-                <h3 className="text-2xl font-serif mb-4 text-white">{exp.title}</h3>
-                <p className="text-gray-400 font-light leading-relaxed text-sm">{exp.desc}</p>
+                <h3 className="text-2xl font-serif mb-4 text-white">{t(language, exp.titleKey)}</h3>
+                <p className="text-gray-400 font-light leading-relaxed text-sm">{t(language, exp.descKey)}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -267,15 +260,11 @@ export default function Home() {
             >
               <div className="w-12 h-[1px] bg-primary mb-8" />
               <h2 className="text-4xl md:text-5xl font-serif mb-8 text-white">
-                Our <span className="italic text-gray-400">Story</span>
+                {t(language, "sections.aboutTitle")} <span className="italic text-gray-400">{t(language, "sections.aboutTitleItalic")}</span>
               </h2>
               <div className="space-y-6 text-gray-400 font-light leading-relaxed">
-                <p>
-                  "Cooking is not just about combining ingredients. It is about capturing a moment in time, an emotion, a memory, and presenting it on a plate."
-                </p>
-                <p>
-                  Born in the heart of Bordj Bou Arreridj, Spart is a celebration of bold flavors and Algerian warmth. Every dish is crafted with precision, passion, and a commitment to quality that rivals the finest establishments.
-                </p>
+                <p>{t(language, "sections.aboutQuote")}</p>
+                <p>{t(language, "sections.aboutBody")}</p>
               </div>
             </motion.div>
           </div>
@@ -295,24 +284,24 @@ export default function Home() {
               variants={fadeInUp}
               className="max-w-md w-full mx-auto lg:mx-0"
             >
-              <h2 className="text-3xl font-serif mb-2 text-white">Contact Us</h2>
-              <p className="text-sm text-gray-400 mb-10 font-light">Request a reservation or inquire about private events.</p>
+              <h2 className="text-3xl font-serif mb-2 text-white">{t(language, "sections.contactTitle")}</h2>
+              <p className="text-sm text-gray-400 mb-10 font-light">{t(language, "sections.contactSub")}</p>
               
               <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                 <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-widest text-gray-500">Name</label>
+                  <label className="text-xs uppercase tracking-widest text-gray-500">{t(language, "form.name")}</label>
                   <Input className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-widest text-gray-500">Email</label>
+                  <label className="text-xs uppercase tracking-widest text-gray-500">{t(language, "form.email")}</label>
                   <Input type="email" className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-widest text-gray-500">Special Requests</label>
+                  <label className="text-xs uppercase tracking-widest text-gray-500">{t(language, "form.requests")}</label>
                   <Textarea className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white resize-none min-h-[80px]" />
                 </div>
                 <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-none py-6 font-medium tracking-widest uppercase text-xs mt-4 gold-glow">
-                  Submit Request
+                  {t(language, "sections.submitRequest")}
                 </Button>
               </form>
             </motion.div>
@@ -322,12 +311,13 @@ export default function Home() {
           <div className="w-full lg:w-1/2 relative bg-zinc-900 flex flex-col justify-between">
             <div className="absolute inset-0 pointer-events-none">
                <iframe 
-                src="https://maps.google.com/maps?q=Bd+Remache+Aissa,+Bordj+Bou+Arreridj+34000,Algeria&output=embed&z=15" 
+                src="https://www.openstreetmap.org/export/embed.html?bbox=4.750%2C36.060%2C4.785%2C36.085&layer=mapnik&marker=36.072%2C4.763" 
                 width="100%" 
                 height="100%" 
-                style={{ border: 0, filter: "invert(90%) hue-rotate(180deg) saturate(0.3) brightness(0.4)" }} 
+                style={{ border: 0, filter: "invert(85%) hue-rotate(180deg) saturate(0.25) brightness(0.45)" }} 
                 allowFullScreen={false} 
                 loading="lazy"
+                title="Spart Location"
               ></iframe>
             </div>
             
