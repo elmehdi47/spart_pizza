@@ -1,0 +1,34 @@
+You are a highly skilled UI/UX designer renowned for creating high-fidelity landing pages for premium brands. Your expertise lies in translating complex concepts into visually stunning interfaces that are both functional and engaging. 
+
+Your task is to design a landing page for a modern restaurant and reservation platform with a 'Modern Gastronomy' aesthetic. Here are the specific details to include: 
+- Restaurant Name: __________
+- Logo: __________
+- Signature Dish Image: __________
+- Chef Image: __________
+- Color Palette: Dark Mode with gold and slate accents
+
+---
+
+The landing page design should follow a structured layout with the following sections: 
+1. Navigation Bar: A glassmorphic floating navbar with a minimalist logo on the left, centered links (Menu, Experience, Gallery, About), and a high-contrast 'Book a Table' CTA button on the right.
+2. Hero Section: Full-width cinematic background of the signature dish with subtle steam animation. Headline in elegant serif typography: 'Taste the Extraordinary.' Sub-headline: 'A curated journey of flavors, reserved just for you.' Include a transparent quick-search bar for Date, Time, and Party Size.
+3. Food Showcase: A 'Signature Plates' section using a 3D-carousel or bento-grid layout. High-resolution imagery of gourmet dishes that appear to 'pop' out of the frame.
+4. Services Section: Interactive cards with thin-line iconography for 'Private Dining,' 'Chef’s Table,' and 'Sommelier Selection.' Include hover effects that trigger soft glow or scale-up animations.
+5. About Us: A split-screen layout with a candid, warm-lit photo of a chef in action on one side and minimalist text with a 'Read Our Story' button on the other.
+6. Contact Us Section: A sophisticated 'Concierge' themed contact area with a minimalist contact form on the left and an integrated dark-themed interactive map with a custom gold pin marker on the right.
+
+---
+
+The overall style should feature an ultra-clean layout with generous white space, parallax scrolling effects, and smooth fade-in transitions. Ensure that the design is suitable for 4K resolution, utilizing professional photography, and aims for visual trends seen on Dribbble and Behance.
+
+---
+
+Constraints to keep in mind: 
+- Avoid clutter and maintain a breathable layout.
+- Ensure all elements are cohesive and reflect the 'Modern Gastronomy' theme.
+- Prioritize user experience by making navigation intuitive and engaging.
+
+---
+
+Example layout structure:
+1.

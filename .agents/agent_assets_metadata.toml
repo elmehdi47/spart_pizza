@@ -1,0 +1,62 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "PnTIc2RNo4P9hs4DfG2LX"
+uri = "file://artifacts/gastronomy/public/hero.png"
+type = "image"
+title = "Hero single scallop dark slate"
+
+[[generated]]
+id = "Q3NRkZxMPAn4tJ4CzwnQr"
+uri = "file://artifacts/gastronomy/public/dish1.png"
+type = "image"
+title = "Wagyu beef dish"
+
+[[generated]]
+id = "fbNTKlvt-4rnryDu6-BLk"
+uri = "file://artifacts/gastronomy/public/dish2.png"
+type = "image"
+title = "Foie gras terrine"
+
+[[generated]]
+id = "YDuAkS4TRskmjbfUJmf4N"
+uri = "file://artifacts/gastronomy/public/dish3.png"
+type = "image"
+title = "Chocolate dessert sphere"
+
+[[generated]]
+id = "a5LRkoL6lKebQWEym4qyn"
+uri = "file://artifacts/gastronomy/public/dish4.png"
+type = "image"
+title = "Seafood platter oysters caviar"
+
+[[generated]]
+id = "D9E6xP0ddpMV3cW8aaup0"
+uri = "file://artifacts/gastronomy/public/chef.png"
+type = "image"
+title = "Executive chef in kitchen"
+
+[[generated]]
+id = "O49Z_qNzIBH09Fs1wr4dx"
+uri = "file://artifacts/gastronomy/public/gallery1.png"
+type = "image"
+title = "Luxury interior gold accents"
+
+[[generated]]
+id = "KtkNzSc4ke6qrjZGMubYx"
+uri = "file://artifacts/gastronomy/public/gallery2.png"
+type = "image"
+title = "Elegant table setting candlelight"
+
+[[generated]]
+id = "YLkpTOHyRph59ZpyLSFBT"
+uri = "file://artifacts/gastronomy/public/gallery3.png"
+type = "image"
+title = "Wine sommelier pouring"
+
+[[generated]]
+id = "CYa5WZqBELxQla2VKEEEy"
+uri = "file://artifacts/gastronomy/public/gallery4.png"
+type = "image"
+title = "Guests dining atmospheric"
