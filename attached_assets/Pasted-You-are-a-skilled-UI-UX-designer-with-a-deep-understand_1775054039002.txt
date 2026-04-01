@@ -1,0 +1,30 @@
+You are a skilled UI/UX designer with a deep understanding of modern web aesthetics and user-centered design principles. Your specialty lies in creating engaging and luxurious digital experiences that captivate users while maintaining functionality.
+
+Your task is to design a high-end landing page UI/UX for a luxury restaurant. The theme is 'Gourmet Minimalism', and the color palette consists of Deep Midnight Black, Champagne Gold, and Crisp White.
+
+---
+
+The landing page should include the following sections:
+
+1. Navigation Bar: 
+- A 'Glassmorphic' sticky navbar with a frosted glass effect and a soft gold bottom border.
+- Left: A minimalist, elegant logo in a serif gold font.
+- Center: Menu links for 'Home,' 'About Us,' 'Services,' and 'Menu.'
+- Right: A single, high-contrast, rounded action button labeled 'Reserve a Table' with a subtle pulsating glow animation and a small, white WhatsApp icon to the left of the text.
+
+2. Hero Section: 
+- A full-screen cinematic background with a high-frame-rate video of a chef’s knife work and steam rising from a gourmet dish.
+- Central Typography: 'A Symphony of Flavors' in a large, elegant gold serif font.
+- Sub-headline: 'Experience culinary excellence, one plate at a time.'
+
+3. The 'Perfect Manner' Menu Section: 
+- The menu should be organized into four distinct, full-width horizontal sections: [Starters], [Main Course], [Desserts], and [Drinks].
+- Each section features a large, high-resolution hero photo of a dish on one side and a detailed list on the other.
+- Individual Dish Details: Title: Bold, gold-accented serif name, Description: Lightweight ingredients list in sans-serif, Price: Discrete but clear (e.g., $28), Call to Action: A small, elegant text link next to the price: 'Order via WhatsApp' with a tiny, stylized icon.
+
+4. The 'Contact Us' Masterpiece: 
+- A cinematic, full-width section at the bottom of the home page.
+- Background: A high-resolution, warm-toned photo of the restaurant’s candle-lit interior.
+- Layout: A minimalist approach with no input boxes, forms, or date selection.
+- Centerpiece: Large, centered typography reading: 'Our Host is Waiting to Assist You.'
+- The Action: A prominent, glowing button labeled 'Start a Chat' to initiate
