@@ -5,7 +5,7 @@ outputs = []
 id = "PnTIc2RNo4P9hs4DfG2LX"
 uri = "file://artifacts/gastronomy/public/hero.png"
 type = "image"
-title = "Hero single scallop dark slate"
+title = "Chef knife work dark cinematic"
 
 [[generated]]
 id = "Q3NRkZxMPAn4tJ4CzwnQr"
@@ -60,3 +60,33 @@ id = "CYa5WZqBELxQla2VKEEEy"
 uri = "file://artifacts/gastronomy/public/gallery4.png"
 type = "image"
 title = "Guests dining atmospheric"
+
+[[generated]]
+id = "fJnua5gpcu37sb04XP9_o"
+uri = "file://artifacts/gastronomy/public/starter.png"
+type = "image"
+title = "Amuse-bouche starter fine dining"
+
+[[generated]]
+id = "HC37STn5mNck1UbPqUAyn"
+uri = "file://artifacts/gastronomy/public/main-course.png"
+type = "image"
+title = "Wagyu beef fillet fine dining"
+
+[[generated]]
+id = "mvuHXO4gmdcYmxtf0xp1H"
+uri = "file://artifacts/gastronomy/public/dessert.png"
+type = "image"
+title = "Chocolate sphere dessert fine dining"
+
+[[generated]]
+id = "iZWXYiEg1pbVLZloA4xsk"
+uri = "file://artifacts/gastronomy/public/drinks.png"
+type = "image"
+title = "Champagne glasses luxury bar"
+
+[[generated]]
+id = "NOUHhp6srBPdXcQJHGJjI"
+uri = "file://artifacts/gastronomy/public/contact.png"
+type = "image"
+title = "Luxury restaurant interior candlelit"
