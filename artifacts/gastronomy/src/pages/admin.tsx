@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Image, UtensilsCrossed, ClipboardList,
-  ArrowLeft, Pencil, Check, X, Trash2, ChevronDown, ChevronUp,
-  RefreshCw, ExternalLink, Upload
+  Pencil, Check, X, Trash2, ChevronDown, ChevronUp,
+  RefreshCw, ExternalLink, LogOut, User2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const API = (path: string) => `/api${path}`;
 
@@ -51,6 +52,13 @@ export default function Admin() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { username, logout } = useAuth();
+  const [, setLocation] = useLocation();
+
+  const handleLogout = () => {
+    logout();
+    setLocation("/");
+  };
 
   const fetchAll = async () => {
     setLoading(true);
@@ -84,11 +92,19 @@ export default function Admin() {
       {/* Sidebar */}
       <aside className="w-64 shrink-0 border-r border-white/5 flex flex-col h-screen sticky top-0">
         <div className="p-6 border-b border-white/5">
-          <div className="flex items-center gap-3 mb-1">
+          <div className="flex items-center gap-3 mb-3">
             <img src="/spart-logo.jpg" alt="Spart" className="h-9 w-9 rounded-full object-cover" />
             <span className="text-lg font-serif font-bold tracking-widest text-white">SPART</span>
           </div>
-          <p className="text-xs text-gray-500 tracking-widest uppercase ml-12">Admin</p>
+          <div className="flex items-center gap-2 px-1 py-2 bg-white/[0.04] border border-white/5 rounded-sm">
+            <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
+              <User2 className="w-3 h-3 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-white font-medium truncate">{username || "Admin"}</p>
+              <p className="text-[10px] text-gray-600">Administrator</p>
+            </div>
+          </div>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
@@ -115,7 +131,7 @@ export default function Admin() {
             className="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs uppercase tracking-widest text-gray-400 hover:text-white border border-white/10 hover:border-white/20 rounded-sm transition-all"
           >
             <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
-            Refresh
+            Refresh Data
           </button>
           <Link href="/">
             <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs uppercase tracking-widest text-gray-400 hover:text-primary border border-white/10 hover:border-primary/30 rounded-sm transition-all">
@@ -123,6 +139,13 @@ export default function Admin() {
               View Site
             </button>
           </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs uppercase tracking-widest text-red-500/70 hover:text-red-400 border border-red-500/15 hover:border-red-500/30 rounded-sm transition-all"
+          >
+            <LogOut className="w-3 h-3" />
+            Sign Out
+          </button>
         </div>
       </aside>
 
