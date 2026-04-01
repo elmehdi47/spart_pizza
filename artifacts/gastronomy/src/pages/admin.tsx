@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Image, UtensilsCrossed, ClipboardList,
-  Pencil, Check, X, Trash2, ChevronDown, ChevronUp,
-  RefreshCw, ExternalLink, LogOut, User2
+  Pencil, Check, X, Trash2,
+  RefreshCw, ExternalLink, LogOut, User2, Plus, Upload, ImageOff
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -342,13 +342,87 @@ function MediaView({ media, onUpdated, toast }: { media: MediaItem[]; onUpdated:
   );
 }
 
+// ── IMAGE UPLOAD FIELD ─────────────────────────────────────────────────────────
+
+function ImageUploadField({
+  value, onChange, toast,
+}: { value: string; onChange: (url: string) => void; toast: any }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.append("image", file);
+    try {
+      const r = await fetch(API("/admin/upload"), { method: "POST", body: fd });
+      if (!r.ok) throw new Error();
+      const data = await r.json() as { url: string };
+      onChange(data.url);
+      toast({ title: "Image uploaded", description: "Image uploaded and URL set." });
+    } catch {
+      toast({ title: "Upload failed", description: "Could not upload image.", variant: "destructive" });
+    }
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-2">
+        <Input
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder="https://... or upload from PC below"
+          className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm flex-1"
+        />
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          className="shrink-0 flex items-center gap-1.5 px-3 py-2 text-xs uppercase tracking-widest font-medium text-gray-300 hover:text-primary border border-white/15 hover:border-primary/40 rounded-sm transition-all disabled:opacity-50"
+        >
+          {uploading ? (
+            <span className="w-3 h-3 border border-white/30 border-t-primary rounded-full animate-spin" />
+          ) : (
+            <Upload className="w-3 h-3" />
+          )}
+          {uploading ? "Uploading..." : "Upload"}
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
+      </div>
+      {value && (
+        <div className="relative h-24 rounded-sm overflow-hidden bg-zinc-900 border border-white/8">
+          <img src={value} alt="Preview" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.opacity = "0.1"; }} />
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center hover:bg-red-900/70 transition-colors"
+          >
+            <X className="w-3 h-3 text-white" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── MENU ──────────────────────────────────────────────────────────────────────
+
+const EMPTY_NEW = { nameEn: "", nameFr: "", nameAr: "", description: "", price: "", imageUrl: "" };
 
 function MenuView({ items, onUpdated, toast }: { items: MenuItem[]; onUpdated: () => void; toast: any }) {
   const [activeCategory, setActiveCategory] = useState("starters");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<Partial<MenuItem>>({});
   const [saving, setSaving] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
+  const [newForm, setNewForm] = useState({ ...EMPTY_NEW });
+  const [creating, setCreating] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   const grouped = CATEGORY_ORDER.reduce<Record<string, MenuItem[]>>((acc, cat) => {
     acc[cat] = items.filter(i => i.category === cat).sort((a, b) => a.sortOrder - b.sortOrder);
@@ -356,6 +430,7 @@ function MenuView({ items, onUpdated, toast }: { items: MenuItem[]; onUpdated: (
   }, {});
 
   const startEdit = (item: MenuItem) => {
+    setShowAdd(false);
     setEditingId(item.id);
     setForm({ ...item });
   };
@@ -371,7 +446,7 @@ function MenuView({ items, onUpdated, toast }: { items: MenuItem[]; onUpdated: (
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nameEn: form.nameEn, nameFr: form.nameFr, nameAr: form.nameAr,
-          description: form.description, price: form.price, imageUrl: form.imageUrl,
+          description: form.description, price: form.price, imageUrl: form.imageUrl || null,
         }),
       });
       if (!r.ok) throw new Error();
@@ -384,15 +459,71 @@ function MenuView({ items, onUpdated, toast }: { items: MenuItem[]; onUpdated: (
     setSaving(false);
   };
 
-  const field = (key: keyof MenuItem) => ({
-    value: (form[key] as string) ?? "",
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setForm(f => ({ ...f, [key]: e.target.value })),
-  });
+  const createItem = async () => {
+    if (!newForm.nameEn.trim()) {
+      toast({ title: "Required", description: "English name is required.", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    try {
+      const r = await fetch(API("/admin/menu"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: activeCategory,
+          nameEn: newForm.nameEn.trim(),
+          nameFr: newForm.nameFr.trim() || newForm.nameEn.trim(),
+          nameAr: newForm.nameAr.trim() || newForm.nameEn.trim(),
+          description: newForm.description.trim(),
+          price: newForm.price.trim(),
+          imageUrl: newForm.imageUrl.trim() || null,
+        }),
+      });
+      if (!r.ok) throw new Error();
+      toast({ title: "Created", description: `"${newForm.nameEn}" added to ${activeCategory}.` });
+      setNewForm({ ...EMPTY_NEW });
+      setShowAdd(false);
+      onUpdated();
+    } catch {
+      toast({ title: "Error", description: "Failed to create menu item.", variant: "destructive" });
+    }
+    setCreating(false);
+  };
+
+  const deleteItem = async (id: number) => {
+    setDeletingId(id);
+    try {
+      const r = await fetch(API(`/admin/menu/${id}`), { method: "DELETE" });
+      if (!r.ok) throw new Error();
+      toast({ title: "Deleted", description: "Menu item removed." });
+      setConfirmDelete(null);
+      onUpdated();
+    } catch {
+      toast({ title: "Error", description: "Failed to delete item.", variant: "destructive" });
+    }
+    setDeletingId(null);
+  };
+
+  const setField = useCallback((key: keyof typeof EMPTY_NEW, val: string) => {
+    setForm(f => ({ ...f, [key]: val }));
+  }, []);
 
   return (
     <div>
-      <h1 className="text-2xl font-serif text-white mb-2">Menu Items</h1>
+      <div className="flex items-center justify-between mb-2">
+        <h1 className="text-2xl font-serif text-white">Menu Items</h1>
+        <button
+          onClick={() => { setShowAdd(v => !v); setEditingId(null); setForm({}); }}
+          className={`flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-widest font-medium rounded-sm border transition-all ${
+            showAdd
+              ? "bg-white/5 text-gray-300 border-white/15"
+              : "bg-primary/15 text-primary border-primary/30 hover:bg-primary/25"
+          }`}
+        >
+          {showAdd ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+          {showAdd ? "Cancel" : "Add New Item"}
+        </button>
+      </div>
       <p className="text-sm text-gray-400 mb-6 font-light">Edit dish names (EN / FR / AR), descriptions, prices, and images.</p>
 
       {/* Category Tabs */}
@@ -400,7 +531,7 @@ function MenuView({ items, onUpdated, toast }: { items: MenuItem[]; onUpdated: (
         {CATEGORY_ORDER.map(cat => (
           <button
             key={cat}
-            onClick={() => { setActiveCategory(cat); cancelEdit(); }}
+            onClick={() => { setActiveCategory(cat); cancelEdit(); setShowAdd(false); setNewForm({ ...EMPTY_NEW }); }}
             className={`px-4 py-2 text-xs uppercase tracking-widest font-medium rounded-sm transition-all ${
               activeCategory === cat
                 ? "bg-primary text-black"
@@ -408,11 +539,129 @@ function MenuView({ items, onUpdated, toast }: { items: MenuItem[]; onUpdated: (
             }`}
           >
             {cat}
+            <span className={`ml-1.5 text-[10px] font-normal ${activeCategory === cat ? "text-black/60" : "text-gray-600"}`}>
+              {grouped[cat]?.length ?? 0}
+            </span>
           </button>
         ))}
       </div>
 
+      {/* Add New Item Form */}
+      <AnimatePresence>
+        {showAdd && (
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            className="border border-primary/30 bg-primary/5 rounded-sm p-6 mb-4"
+          >
+            <div className="flex items-center gap-2 mb-5">
+              <div className="w-5 h-5 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center">
+                <Plus className="w-3 h-3 text-primary" />
+              </div>
+              <p className="text-sm font-medium text-white">
+                New item in <span className="text-primary capitalize">{activeCategory}</span>
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="text-xs uppercase tracking-widest text-gray-500 block mb-1.5">Name (EN) <span className="text-red-400">*</span></label>
+                <Input
+                  value={newForm.nameEn}
+                  onChange={e => setNewForm(f => ({ ...f, nameEn: e.target.value }))}
+                  placeholder="e.g. Grilled Chicken"
+                  autoFocus
+                  className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs uppercase tracking-widest text-gray-500 block mb-1.5">Name (FR)</label>
+                <Input
+                  value={newForm.nameFr}
+                  onChange={e => setNewForm(f => ({ ...f, nameFr: e.target.value }))}
+                  placeholder="e.g. Poulet Grillé"
+                  className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs uppercase tracking-widest text-gray-500 block mb-1.5">Name (AR)</label>
+                <Input
+                  value={newForm.nameAr}
+                  onChange={e => setNewForm(f => ({ ...f, nameAr: e.target.value }))}
+                  dir="rtl"
+                  placeholder="مثال: دجاج مشوي"
+                  className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm text-right"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="md:col-span-2">
+                <label className="text-xs uppercase tracking-widest text-gray-500 block mb-1.5">Description</label>
+                <Textarea
+                  value={newForm.description}
+                  onChange={e => setNewForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="Short description of the dish..."
+                  className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm resize-none"
+                  rows={2}
+                />
+              </div>
+              <div>
+                <label className="text-xs uppercase tracking-widest text-gray-500 block mb-1.5">Price</label>
+                <Input
+                  value={newForm.price}
+                  onChange={e => setNewForm(f => ({ ...f, price: e.target.value }))}
+                  placeholder="e.g. 1200 DA"
+                  className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm"
+                />
+              </div>
+            </div>
+
+            <div className="mb-5">
+              <label className="text-xs uppercase tracking-widest text-gray-500 block mb-1.5">Photo</label>
+              <ImageUploadField
+                value={newForm.imageUrl}
+                onChange={url => setNewForm(f => ({ ...f, imageUrl: url }))}
+                toast={toast}
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                disabled={creating}
+                onClick={createItem}
+                className="bg-primary hover:bg-primary/90 text-black font-semibold text-xs uppercase tracking-widest rounded-sm px-6"
+              >
+                <Check className="w-3 h-3 mr-1.5" />
+                {creating ? "Creating..." : "Create Item"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => { setShowAdd(false); setNewForm({ ...EMPTY_NEW }); }}
+                className="border-white/15 text-gray-400 hover:text-white rounded-sm text-xs"
+              >
+                Cancel
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Item List */}
       <div className="space-y-3">
+        {(grouped[activeCategory] || []).length === 0 && !showAdd && (
+          <div className="flex flex-col items-center justify-center py-16 border border-dashed border-white/8 rounded-sm text-gray-600">
+            <ImageOff className="w-8 h-8 mb-3 opacity-40" />
+            <p className="text-sm">No items in this category yet.</p>
+            <button
+              onClick={() => setShowAdd(true)}
+              className="mt-4 text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+            >
+              <Plus className="w-3 h-3" /> Add the first item
+            </button>
+          </div>
+        )}
         {(grouped[activeCategory] || []).map(item => (
           <div
             key={item.id}
@@ -428,30 +677,56 @@ function MenuView({ items, onUpdated, toast }: { items: MenuItem[]; onUpdated: (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div>
                     <label className="text-xs uppercase tracking-widest text-gray-500 block mb-1.5">Name (EN)</label>
-                    <Input {...field("nameEn")} className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm" />
+                    <Input
+                      value={(form.nameEn as string) ?? ""}
+                      onChange={e => setForm(f => ({ ...f, nameEn: e.target.value }))}
+                      className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm"
+                    />
                   </div>
                   <div>
                     <label className="text-xs uppercase tracking-widest text-gray-500 block mb-1.5">Name (FR)</label>
-                    <Input {...field("nameFr")} className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm" />
+                    <Input
+                      value={(form.nameFr as string) ?? ""}
+                      onChange={e => setForm(f => ({ ...f, nameFr: e.target.value }))}
+                      className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm"
+                    />
                   </div>
                   <div>
                     <label className="text-xs uppercase tracking-widest text-gray-500 block mb-1.5">Name (AR)</label>
-                    <Input {...field("nameAr")} dir="rtl" className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm text-right" />
+                    <Input
+                      value={(form.nameAr as string) ?? ""}
+                      onChange={e => setForm(f => ({ ...f, nameAr: e.target.value }))}
+                      dir="rtl"
+                      className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm text-right"
+                    />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div className="md:col-span-2">
                     <label className="text-xs uppercase tracking-widest text-gray-500 block mb-1.5">Description</label>
-                    <Textarea {...field("description")} className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm resize-none" rows={2} />
+                    <Textarea
+                      value={(form.description as string) ?? ""}
+                      onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                      className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm resize-none"
+                      rows={2}
+                    />
                   </div>
                   <div>
                     <label className="text-xs uppercase tracking-widest text-gray-500 block mb-1.5">Price</label>
-                    <Input {...field("price")} className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm" />
+                    <Input
+                      value={(form.price as string) ?? ""}
+                      onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
+                      className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm"
+                    />
                   </div>
                 </div>
                 <div className="mb-5">
-                  <label className="text-xs uppercase tracking-widest text-gray-500 block mb-1.5">Image URL (optional)</label>
-                  <Input {...field("imageUrl")} placeholder="https://... or leave empty for category image" className="bg-transparent border-white/15 text-white text-sm focus-visible:border-primary focus-visible:ring-0 rounded-sm" />
+                  <label className="text-xs uppercase tracking-widest text-gray-500 block mb-1.5">Photo</label>
+                  <ImageUploadField
+                    value={(form.imageUrl as string) ?? ""}
+                    onChange={url => setForm(f => ({ ...f, imageUrl: url }))}
+                    toast={toast}
+                  />
                 </div>
                 <div className="flex gap-3">
                   <Button
@@ -463,12 +738,7 @@ function MenuView({ items, onUpdated, toast }: { items: MenuItem[]; onUpdated: (
                     <Check className="w-3 h-3 mr-1" />
                     {saving ? "Saving..." : "Save Changes"}
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={cancelEdit}
-                    className="border-white/15 text-gray-400 hover:text-white rounded-sm text-xs"
-                  >
+                  <Button size="sm" variant="outline" onClick={cancelEdit} className="border-white/15 text-gray-400 hover:text-white rounded-sm text-xs">
                     Cancel
                   </Button>
                 </div>
@@ -476,6 +746,17 @@ function MenuView({ items, onUpdated, toast }: { items: MenuItem[]; onUpdated: (
             ) : (
               /* Row View */
               <div className="p-4 flex items-center gap-4">
+                {/* Thumbnail */}
+                <div className="w-12 h-12 rounded-sm overflow-hidden bg-zinc-900 shrink-0 border border-white/5">
+                  {item.imageUrl ? (
+                    <img src={item.imageUrl} alt={item.nameEn} className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.opacity = "0.15"; }} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ImageOff className="w-4 h-4 text-gray-700" />
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-0.5">
                     <p className="font-serif text-white font-medium">{item.nameEn}</p>
@@ -484,7 +765,9 @@ function MenuView({ items, onUpdated, toast }: { items: MenuItem[]; onUpdated: (
                   </div>
                   <p className="text-xs text-gray-500 font-light truncate">{item.description}</p>
                 </div>
+
                 <span className="font-serif text-primary font-medium shrink-0">{item.price}</span>
+
                 <button
                   onClick={() => startEdit(item)}
                   className="shrink-0 flex items-center gap-1.5 text-xs text-gray-400 hover:text-primary transition-colors px-3 py-1.5 border border-white/10 hover:border-primary/30 rounded-sm"
@@ -492,6 +775,32 @@ function MenuView({ items, onUpdated, toast }: { items: MenuItem[]; onUpdated: (
                   <Pencil className="w-3 h-3" />
                   Edit
                 </button>
+
+                {confirmDelete === item.id ? (
+                  <div className="shrink-0 flex items-center gap-2">
+                    <span className="text-xs text-red-400">Delete?</span>
+                    <button
+                      onClick={() => deleteItem(item.id)}
+                      disabled={deletingId === item.id}
+                      className="text-xs text-red-400 hover:text-red-300 px-2 py-1 border border-red-500/30 hover:border-red-400/50 rounded-sm transition-colors disabled:opacity-50"
+                    >
+                      {deletingId === item.id ? "..." : "Yes"}
+                    </button>
+                    <button
+                      onClick={() => setConfirmDelete(null)}
+                      className="text-xs text-gray-500 hover:text-gray-300 px-2 py-1 border border-white/10 rounded-sm"
+                    >
+                      No
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmDelete(item.id)}
+                    className="shrink-0 flex items-center gap-1.5 text-xs text-gray-600 hover:text-red-400 transition-colors px-2 py-1.5 border border-white/5 hover:border-red-500/30 rounded-sm"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                )}
               </div>
             )}
           </div>
