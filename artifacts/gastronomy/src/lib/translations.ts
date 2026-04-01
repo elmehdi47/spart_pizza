@@ -46,6 +46,7 @@ export const translations = {
     form: {
       name: "Name",
       email: "Email",
+      phone: "Phone Number",
       requests: "Special Requests"
     }
   },
@@ -96,6 +97,7 @@ export const translations = {
     form: {
       name: "Nom",
       email: "E-mail",
+      phone: "Numéro de Téléphone",
       requests: "Demandes Spéciales"
     }
   },
@@ -146,6 +148,7 @@ export const translations = {
     form: {
       name: "الاسم",
       email: "البريد الإلكتروني",
+      phone: "رقم الهاتف",
       requests: "طلبات خاصة"
     }
   }

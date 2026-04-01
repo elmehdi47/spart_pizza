@@ -42,8 +42,8 @@ export default function Home() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formName.trim() || !formEmail.trim()) {
-      toast({ title: "Required fields", description: "Please enter your name and email.", variant: "destructive" });
+    if (!formName.trim() || !formEmail.trim() || !formPhone.trim()) {
+      toast({ title: "Required fields", description: "Please enter your name, email, and phone number.", variant: "destructive" });
       return;
     }
     setFormSubmitting(true);
@@ -352,8 +352,8 @@ export default function Home() {
                     <Input type="email" value={formEmail} onChange={e => setFormEmail(e.target.value)} required className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest text-gray-500">Phone (optional)</label>
-                    <Input value={formPhone} onChange={e => setFormPhone(e.target.value)} className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white" />
+                    <label className="text-xs uppercase tracking-widest text-gray-500">{t(language, "form.phone")} <span className="text-primary">*</span></label>
+                    <Input type="tel" value={formPhone} onChange={e => setFormPhone(e.target.value)} required className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary text-white" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs uppercase tracking-widest text-gray-500">{t(language, "form.requests")}</label>
