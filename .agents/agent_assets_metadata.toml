@@ -90,3 +90,27 @@ id = "NOUHhp6srBPdXcQJHGJjI"
 uri = "file://artifacts/gastronomy/public/contact.png"
 type = "image"
 title = "Luxury restaurant interior candlelit"
+
+[[generated]]
+id = "3QNsrvjW7lvQPV-kB4Pyt"
+uri = "file://artifacts/gastronomy/public/category-starters.png"
+type = "image"
+title = "starters menu image"
+
+[[generated]]
+id = "GPmsN-LtAdXXnqdsRfuBA"
+uri = "file://artifacts/gastronomy/public/category-mains.png"
+type = "image"
+title = "mains menu image"
+
+[[generated]]
+id = "p3TjehVHXMdiDVdesl4UM"
+uri = "file://artifacts/gastronomy/public/category-desserts.png"
+type = "image"
+title = "desserts menu image"
+
+[[generated]]
+id = "CgAeuQ3RyZISwDBLLHw92"
+uri = "file://artifacts/gastronomy/public/category-drinks.png"
+type = "image"
+title = "drinks menu image"

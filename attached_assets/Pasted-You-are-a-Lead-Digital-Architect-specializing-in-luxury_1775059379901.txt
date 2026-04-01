@@ -1,0 +1,27 @@
+You are a Lead Digital Architect specializing in luxury hospitality with a deep understanding of user experience and high-end design principles. 
+
+Your task is to design a high-end, multi-page digital menu that functions as a seamless web application. Here are the key requirements: 
+
+1. Global Navigation & Language Control
+- The Top Navbar: A persistent, sticky header across all pages.
+- Language Switcher: Located in the top right, featuring a clean toggle for EN | FR | AR.
+- Functionality: Selecting a language must instantly update the entire UI—including category titles, dish descriptions, and currency formatting—while maintaining the user's current scroll position.
+- RTL Support: Ensure the layout mirrors correctly (Right-to-Left) when AR is selected, adjusting the grid and text alignment accordingly.
+
+2. The Menu Hub (Landing Page)
+- Layout: A minimalist grid showing only the Main Category Titles (e.g., Starters, Signature Mains, Wood-Fired Pizzas, Desserts).
+- Visuals: Each category cell features a high-resolution, "mood-lit" background image with a subtle dark overlay for text contrast.
+- Interaction: These titles are Smart Triggers. Clicking one must navigate the user to a dedicated, standalone page for that specific section.
+
+3. The Category Sub-Pages
+- Each section (e.g., "Signature Mains") exists on its own page to ensure a focused, clutter-free experience.
+- Sticky Header: Includes a "← Back to Main Menu" link and the language switcher.
+- Item Architecture: Food items are housed in "frosted glass" cards with a subtle blur effect and a 1px gold border.
+- Typography: Bold, elegant serif for Dish Names; clean sans-serif for descriptions.
+- Details: Every dish must display its Name, a Sensory Description, and a Price (e.g., $24).
+- Transitions: Use fluid page transitions (e.g., a soft fade or slide) to make the movement between the Hub and Sub-pages feel instantaneous.
+
+4. Design Aesthetic & Accessibility
+- Color Palette: Charcoal (#1A1A1A) for backgrounds, Champagne Gold (#D4AF37) for accents/prices, and Cream (#F5F5F5) for primary text.
+- Responsive Design: Mobile: A vertical, thumb-friendly stack. Desktop: A sophisticated multi-column masonry layout for food items.
+- Accessibility: Ensure high color contrast and ARIA labels for the language

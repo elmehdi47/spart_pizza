@@ -52,13 +52,23 @@ export default function Home() {
           
           <nav className="hidden md:flex items-center gap-8">
             {['Menu', 'Experience', 'About'].map((item) => (
-              <a 
-                key={item} 
-                href={`#${item.toLowerCase()}`}
-                className="text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors"
-              >
-                {item}
-              </a>
+              item === 'Menu' ? (
+                <Link
+                  key={item}
+                  href="/menu"
+                  className="text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors"
+                >
+                  {item}
+                </Link>
+              ) : (
+                <a 
+                  key={item} 
+                  href={`#${item.toLowerCase()}`}
+                  className="text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors"
+                >
+                  {item}
+                </a>
+              )
             ))}
           </nav>
           
