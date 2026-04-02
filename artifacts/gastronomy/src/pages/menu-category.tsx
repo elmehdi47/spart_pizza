@@ -13,7 +13,7 @@ const dishImagePositions = [
 ];
 
 export default function MenuCategory() {
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
   const params = useParams();
   const [, navigate] = useLocation();
   const slug = params.slug as keyof typeof menuItems;
@@ -58,20 +58,10 @@ export default function MenuCategory() {
             </div>
           </div>
 
-          {/* Language switcher — right */}
-          <div className="flex items-center gap-2 text-[11px] tracking-[0.18em] font-medium uppercase">
-            {(["en", "fr", "ar"] as const).map((lang, i, arr) => (
-              <span key={lang} className="flex items-center gap-2">
-                <button
-                  onClick={() => setLanguage(lang)}
-                  className={`transition-colors ${language === lang ? "text-primary" : "text-gray-500 hover:text-white"}`}
-                >
-                  {lang}
-                </button>
-                {i < arr.length - 1 && <span className="text-white/15">|</span>}
-              </span>
-            ))}
-          </div>
+          {/* Current language badge — right */}
+          <span className="text-[10px] uppercase tracking-[0.25em] font-medium text-primary/70 border border-primary/20 px-2.5 py-1 rounded-sm">
+            {language}
+          </span>
         </div>
 
         {/* Thin gradient accent under the header */}
@@ -130,6 +120,36 @@ export default function MenuCategory() {
           ))}
         </motion.div>
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-white/5 bg-black/60 mt-8">
+        <div className="container mx-auto px-6 md:px-12 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+
+          {/* Brand */}
+          <div className="flex items-center gap-3">
+            <img src="/spart-logo.jpg" alt="Spart" className="h-8 w-8 rounded-full object-cover opacity-80" />
+            <div>
+              <p className="text-sm font-serif font-semibold tracking-widest text-white/80">SPART</p>
+              <p className="text-[10px] uppercase tracking-widest text-gray-600">Bordj Bou Arreridj</p>
+            </div>
+          </div>
+
+          {/* Back to menu CTA */}
+          <button
+            onClick={handleBack}
+            className="group flex items-center gap-2 text-xs uppercase tracking-widest text-gray-500 hover:text-primary transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+            {t(language, "navBack").replace("← ", "").replace(" ←", "")}
+          </button>
+
+          {/* Copyright */}
+          <p className="text-[10px] uppercase tracking-widest text-gray-700">
+            © {new Date().getFullYear()} Spart Restaurant
+          </p>
+        </div>
+        <div className="h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
+      </footer>
     </div>
   );
 }
