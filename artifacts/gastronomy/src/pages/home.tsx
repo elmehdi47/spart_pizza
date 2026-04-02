@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { t } from "@/lib/translations";
-import { menuCategories } from "@/lib/menuData";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -33,8 +32,18 @@ export default function Home() {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [apiCategories, setApiCategories] = useState<Array<{
+    id: number; slug: string; nameEn: string; nameFr: string; nameAr: string; imageUrl?: string; sortOrder: number;
+  }>>([]);
 
   const closeMobile = () => setMobileMenuOpen(false);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setApiCategories(data); })
+      .catch(() => {});
+  }, []);
 
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
@@ -279,35 +288,41 @@ export default function Home() {
             variants={staggerContainer}
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
-            {menuCategories.map((category, i) => (
-              <motion.div
-                key={category.id}
-                variants={{
-                  hidden: { opacity: 0, y: 30 },
-                  visible: { opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.6 } }
-                }}
-                onClick={() => setLocation(`/menu/${category.slug}`)}
-                className="group relative overflow-hidden cursor-pointer border border-transparent hover:border-primary/50 transition-colors duration-500"
-                style={{ aspectRatio: "16/9" }}
-              >
-                <div className="absolute inset-0">
-                  <img 
-                    src={category.image}
-                    alt={t(language, `categories.${category.id}`)}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                </div>
-                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-colors duration-500" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
-                  <h3 className="text-3xl md:text-4xl font-serif text-primary mb-3 drop-shadow-md">
-                    {t(language, `categories.${category.id}`)}
-                  </h3>
-                  <span className="text-xs uppercase tracking-widest text-white/80 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
-                    Explore →
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+            {apiCategories.map((category, i) => {
+              const catName = language === "fr" ? category.nameFr
+                : language === "ar" ? category.nameAr
+                : category.nameEn;
+              const imgSrc = category.imageUrl || "/hero.png";
+              return (
+                <motion.div
+                  key={category.id}
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: { opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.6 } }
+                  }}
+                  onClick={() => setLocation(`/menu/${category.slug}`)}
+                  className="group relative overflow-hidden cursor-pointer border border-transparent hover:border-primary/50 transition-colors duration-500"
+                  style={{ aspectRatio: "16/9" }}
+                >
+                  <div className="absolute inset-0">
+                    <img
+                      src={imgSrc}
+                      alt={catName}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-colors duration-500" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+                    <h3 className="text-3xl md:text-4xl font-serif text-primary mb-3 drop-shadow-md">
+                      {catName}
+                    </h3>
+                    <span className="text-xs uppercase tracking-widest text-white/80 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                      Explore →
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            })}
           </motion.div>
         </div>
       </section>

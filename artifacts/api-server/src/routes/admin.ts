@@ -3,8 +3,25 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { db } from "@workspace/db";
-import { mediaSettings, menuItems, orders } from "@workspace/db";
+import { mediaSettings, menuItems, menuCategories, orders } from "@workspace/db";
 import { eq } from "drizzle-orm";
+
+// ── DEFAULT CATEGORIES (seeded if table is empty) ─────────────────────────────
+const DEFAULT_CATEGORIES = [
+  { slug: "starters", nameEn: "Starters", nameFr: "Entrées", nameAr: "المقبلات", imageUrl: "/category-starters.png", sortOrder: 1 },
+  { slug: "mains", nameEn: "Signature Mains", nameFr: "Plats Signatures", nameAr: "الأطباق الرئيسية", imageUrl: "/category-mains.png", sortOrder: 2 },
+  { slug: "desserts", nameEn: "Desserts", nameFr: "Desserts", nameAr: "الحلويات", imageUrl: "/category-desserts.png", sortOrder: 3 },
+  { slug: "drinks", nameEn: "Drinks", nameFr: "Boissons", nameAr: "المشروبات", imageUrl: "/category-drinks.png", sortOrder: 4 },
+];
+
+async function getCategoriesSeeded() {
+  const existing = await db.select().from(menuCategories).orderBy(menuCategories.sortOrder);
+  if (existing.length === 0) {
+    await db.insert(menuCategories).values(DEFAULT_CATEGORIES);
+    return await db.select().from(menuCategories).orderBy(menuCategories.sortOrder);
+  }
+  return existing;
+}
 
 const adminRouter = Router();
 
@@ -124,6 +141,76 @@ adminRouter.delete("/admin/menu/:id", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete menu item" });
+  }
+});
+
+// ── CATEGORIES (public) ────────────────────────────────────────────────────────
+
+adminRouter.get("/categories", async (_req, res) => {
+  try {
+    const rows = await getCategoriesSeeded();
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch categories" });
+  }
+});
+
+// ── MENU ITEMS BY SLUG (public) ────────────────────────────────────────────────
+
+adminRouter.get("/menu/by-category/:slug", async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const rows = await db.select().from(menuItems).where(eq(menuItems.category, slug)).orderBy(menuItems.sortOrder);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch menu items" });
+  }
+});
+
+// ── CATEGORIES (admin CRUD) ────────────────────────────────────────────────────
+
+adminRouter.get("/admin/categories", async (_req, res) => {
+  try {
+    const rows = await getCategoriesSeeded();
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch categories" });
+  }
+});
+
+adminRouter.post("/admin/categories", async (req, res) => {
+  try {
+    const { slug, nameEn, nameFr, nameAr, imageUrl } = req.body as {
+      slug: string; nameEn: string; nameFr?: string; nameAr?: string; imageUrl?: string;
+    };
+    if (!slug || !nameEn) return res.status(400).json({ error: "slug and nameEn are required" });
+
+    const cleanSlug = slug.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    const all = await db.select().from(menuCategories);
+    const sortOrder = all.length > 0 ? Math.max(...all.map(c => c.sortOrder)) + 1 : 1;
+
+    const [inserted] = await db.insert(menuCategories).values({
+      slug: cleanSlug,
+      nameEn,
+      nameFr: nameFr?.trim() || nameEn,
+      nameAr: nameAr?.trim() || nameEn,
+      imageUrl: imageUrl?.trim() || null,
+      sortOrder,
+    }).returning();
+    res.json(inserted);
+  } catch (err: any) {
+    if (err?.code === "23505") return res.status(400).json({ error: "A category with this slug already exists." });
+    res.status(500).json({ error: "Failed to create category" });
+  }
+});
+
+adminRouter.delete("/admin/categories/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    await db.delete(menuCategories).where(eq(menuCategories.id, id));
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete category" });
   }
 });
 

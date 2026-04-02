@@ -3,7 +3,16 @@ import { useParams, useLocation } from "wouter";
 import { ArrowLeft, Instagram, MapPin, Clock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { t } from "@/lib/translations";
-import { menuItems, menuCategories } from "@/lib/menuData";
+import { useState, useEffect } from "react";
+
+type DbMenuItem = {
+  id: number; nameEn: string; nameFr: string; nameAr: string;
+  description: string; price: string; imageUrl?: string;
+  category: string; sortOrder: number;
+};
+type DbCategory = {
+  id: number; slug: string; nameEn: string; nameFr: string; nameAr: string; imageUrl?: string;
+};
 
 const dishImagePositions = [
   "object-[center_20%]",
@@ -16,17 +25,37 @@ export default function MenuCategory() {
   const { language } = useLanguage();
   const params = useParams();
   const [, navigate] = useLocation();
-  const slug = params.slug as keyof typeof menuItems;
+  const slug = params.slug as string;
+
+  const [items, setItems] = useState<DbMenuItem[]>([]);
+  const [categoryData, setCategoryData] = useState<DbCategory | null>(null);
+
+  useEffect(() => {
+    if (!slug) return;
+    fetch(`/api/menu/by-category/${slug}`)
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setItems(data); })
+      .catch(() => {});
+    fetch(`/api/categories`)
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const found = data.find((c: DbCategory) => c.slug === slug);
+          if (found) setCategoryData(found);
+        }
+      })
+      .catch(() => {});
+  }, [slug]);
 
   const handleBack = () => {
     sessionStorage.setItem("scrollTo", "menu");
     navigate("/");
   };
 
-  const items = menuItems[slug] || [];
-  const categoryName = t(language, `categories.${slug}`);
-  const categoryData = menuCategories.find((c) => c.slug === slug);
-  const categoryImage = categoryData?.image ?? "/hero.png";
+  const categoryName = categoryData
+    ? (language === "fr" ? categoryData.nameFr : language === "ar" ? categoryData.nameAr : categoryData.nameEn)
+    : t(language, `categories.${slug}`);
+  const categoryImage = categoryData?.imageUrl ?? "/hero.png";
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-primary/30 selection:text-primary">
@@ -74,45 +103,60 @@ export default function MenuCategory() {
           }}
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
-          {items.map((item, idx) => (
-            <motion.div
-              key={idx}
-              variants={{
-                hidden: { opacity: 0, y: 28 },
-                visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
-              }}
-              className="group overflow-hidden rounded-sm
-                bg-white/[0.03] hover:bg-white/[0.055]
-                border border-white/5 hover:border-primary/30
-                transition-all duration-350 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
+          {items.length === 0 && (
+            <motion.p
+              variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+              className="col-span-2 text-center text-gray-600 py-20 text-sm uppercase tracking-widest"
             >
-              {/* Image */}
-              <div className="relative h-44 overflow-hidden">
-                <img
-                  src={categoryImage}
-                  alt={item.names.en}
-                  className={`w-full h-full object-cover ${dishImagePositions[idx % dishImagePositions.length]}
-                    transition-transform duration-700 group-hover:scale-105`}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d0d] via-black/30 to-transparent" />
-                {/* Price badge floating on image */}
-                <span className="absolute top-3 right-3 font-serif text-sm font-semibold text-white bg-primary/90 px-3 py-1 rounded-sm backdrop-blur-sm">
-                  {item.price}
-                </span>
-              </div>
+              {language === "fr" ? "Aucun plat disponible" : language === "ar" ? "لا توجد أطباق متاحة" : "No items available"}
+            </motion.p>
+          )}
+          {items.map((item, idx) => {
+            const itemName = language === "fr" ? item.nameFr
+              : language === "ar" ? item.nameAr
+              : item.nameEn;
+            const itemImg = item.imageUrl || categoryImage;
+            return (
+              <motion.div
+                key={item.id}
+                variants={{
+                  hidden: { opacity: 0, y: 28 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+                }}
+                className="group overflow-hidden rounded-sm
+                  bg-white/[0.03] hover:bg-white/[0.055]
+                  border border-white/5 hover:border-primary/30
+                  transition-all duration-350 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
+              >
+                {/* Image */}
+                <div className="relative h-44 overflow-hidden">
+                  <img
+                    src={itemImg}
+                    alt={itemName}
+                    className={`w-full h-full object-cover ${dishImagePositions[idx % dishImagePositions.length]}
+                      transition-transform duration-700 group-hover:scale-105`}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d0d] via-black/30 to-transparent" />
+                  {item.price && (
+                    <span className="absolute top-3 right-3 font-serif text-sm font-semibold text-white bg-primary/90 px-3 py-1 rounded-sm backdrop-blur-sm">
+                      {item.price}
+                    </span>
+                  )}
+                </div>
 
-              {/* Content */}
-              <div className="p-6 flex flex-col gap-3">
-                <h3 className="font-serif text-xl font-semibold text-white leading-snug group-hover:text-white/95 transition-colors">
-                  {item.names[language]}
-                </h3>
-                <div className="h-[1px] bg-gradient-to-r from-primary/40 via-white/10 to-transparent" />
-                <p className="font-sans text-sm font-light text-gray-400 leading-relaxed">
-                  {item.description}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+                {/* Content */}
+                <div className="p-6 flex flex-col gap-3">
+                  <h3 className="font-serif text-xl font-semibold text-white leading-snug group-hover:text-white/95 transition-colors">
+                    {itemName}
+                  </h3>
+                  <div className="h-[1px] bg-gradient-to-r from-primary/40 via-white/10 to-transparent" />
+                  <p className="font-sans text-sm font-light text-gray-400 leading-relaxed">
+                    {item.description}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </main>
 

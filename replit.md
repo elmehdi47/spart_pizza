@@ -1,3 +1,22 @@
+# SPART Restaurant — Gastronomy Platform
+
+## Project Overview
+
+Luxury restaurant landing page for **SPART** (Bordj Bou Arreridj, Algeria). Dark/orange aesthetic with cinematic sections, EN/FR/AR language switching, a dynamic menu driven by the database, and a full admin panel to manage pictures, categories, menu items, and reservations.
+
+## Admin Credentials
+- Username: `spartpizza` | Password: `34pizzaspart;`
+- Token: HMAC-signed, 8 hours TTL, stored in sessionStorage
+
+## Key Features
+- Dynamic categories (DB-driven, seeded from 4 defaults: starters/mains/desserts/drinks)
+- Menu items by category from DB; fallback to hardcoded data when empty
+- Admin panel: Dashboard, Media, Categories (CRUD), Menu Items (CRUD), Orders
+- Multi-language: English, French, Arabic — context-driven, no reload
+- Reservations/contact form → orders table in DB
+
+---
+
 # Workspace
 
 ## Overview

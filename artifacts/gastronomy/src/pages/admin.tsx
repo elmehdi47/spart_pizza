@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Image, UtensilsCrossed, ClipboardList,
+  LayoutDashboard, Image, UtensilsCrossed, ClipboardList, Layers,
   Pencil, Check, X, Trash2,
   RefreshCw, ExternalLink, LogOut, User2, Plus, Upload, ImageOff
 } from "lucide-react";
@@ -26,6 +26,11 @@ type Order = {
   customerPhone?: string; message?: string; status: string;
   createdAt: string;
 };
+type Category = {
+  id: number; slug: string;
+  nameEn: string; nameFr: string; nameAr: string;
+  imageUrl?: string; sortOrder: number;
+};
 
 const SLOT_LABELS: Record<string, string> = {
   hero: "Hero Banner",
@@ -43,13 +48,14 @@ const STATUS_COLORS: Record<string, string> = {
 
 const CATEGORY_ORDER = ["starters", "mains", "desserts", "drinks"];
 
-type Section = "dashboard" | "media" | "menu" | "orders";
+type Section = "dashboard" | "media" | "menu" | "orders" | "categories";
 
 export default function Admin() {
   const [section, setSection] = useState<Section>("dashboard");
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { username, logout } = useAuth();
@@ -63,14 +69,16 @@ export default function Admin() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [m, mi, o] = await Promise.all([
+      const [m, mi, o, cats] = await Promise.all([
         fetch(API("/admin/media")).then(r => r.json()),
         fetch(API("/admin/menu")).then(r => r.json()),
         fetch(API("/admin/orders")).then(r => r.json()),
+        fetch(API("/admin/categories")).then(r => r.json()),
       ]);
       setMedia(Array.isArray(m) ? m : []);
       setMenuItems(Array.isArray(mi) ? mi : []);
       setOrders(Array.isArray(o) ? o : []);
+      setCategories(Array.isArray(cats) ? cats : []);
     } catch {
       toast({ title: "Connection error", description: "Could not reach the API server.", variant: "destructive" });
     }
@@ -82,6 +90,7 @@ export default function Admin() {
   const nav: { id: Section; label: string; icon: React.ReactNode }[] = [
     { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: "media", label: "Media", icon: <Image className="w-4 h-4" /> },
+    { id: "categories", label: "Categories", icon: <Layers className="w-4 h-4" /> },
     { id: "menu", label: "Menu Items", icon: <UtensilsCrossed className="w-4 h-4" /> },
     { id: "orders", label: "Orders", icon: <ClipboardList className="w-4 h-4" /> },
   ];
@@ -158,8 +167,11 @@ export default function Admin() {
           {section === "media" && (
             <MediaView media={media} onUpdated={fetchAll} toast={toast} />
           )}
+          {section === "categories" && (
+            <CategoriesView categories={categories} onUpdated={fetchAll} toast={toast} />
+          )}
           {section === "menu" && (
-            <MenuView items={menuItems} onUpdated={fetchAll} toast={toast} />
+            <MenuView items={menuItems} categories={categories} onUpdated={fetchAll} toast={toast} />
           )}
           {section === "orders" && (
             <OrdersView orders={orders} onUpdated={fetchAll} toast={toast} />
@@ -409,12 +421,174 @@ function ImageUploadField({
   );
 }
 
+// ── CATEGORIES ────────────────────────────────────────────────────────────────
+
+function CategoriesView({ categories, onUpdated, toast }: { categories: Category[]; onUpdated: () => void; toast: any }) {
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState({ slug: "", nameEn: "", nameFr: "", nameAr: "", imageUrl: "" });
+  const [creating, setCreating] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+
+  const API = (path: string) => `/api${path}`;
+
+  const handleCreate = async () => {
+    if (!form.slug.trim() || !form.nameEn.trim()) {
+      toast({ title: "Missing fields", description: "Slug and English name are required.", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    const res = await fetch(API("/admin/categories"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${sessionStorage.getItem("admin_token")}` },
+      body: JSON.stringify({ ...form }),
+    });
+    const data = await res.json();
+    setCreating(false);
+    if (!res.ok) {
+      toast({ title: "Error", description: data.error || "Failed to create category", variant: "destructive" });
+    } else {
+      toast({ title: "Category created" });
+      setForm({ slug: "", nameEn: "", nameFr: "", nameAr: "", imageUrl: "" });
+      setShowAdd(false);
+      onUpdated();
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    setDeletingId(id);
+    const res = await fetch(API(`/admin/categories/${id}`), {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${sessionStorage.getItem("admin_token")}` },
+    });
+    setDeletingId(null);
+    setConfirmDelete(null);
+    if (!res.ok) {
+      toast({ title: "Error", description: "Failed to delete category", variant: "destructive" });
+    } else {
+      toast({ title: "Category deleted" });
+      onUpdated();
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <h2 className="text-xl font-light tracking-widest uppercase text-white">Categories</h2>
+          <p className="text-sm text-gray-400 mt-1 font-light">
+            Manage the menu categories shown on the home page and menu pages.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowAdd(!showAdd)}
+          className="flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-widest border border-white/10 text-gray-400 hover:text-white hover:border-white/30 rounded-sm transition-all"
+        >
+          <Plus className="w-3 h-3" /> {showAdd ? "Cancel" : "Add Category"}
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {showAdd && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+            className="mb-6 p-5 border border-primary/30 bg-primary/5 rounded-sm"
+          >
+            <p className="text-xs uppercase tracking-widest text-primary mb-4">New Category</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Slug (URL key) *</label>
+                <Input value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
+                  placeholder="e.g. pasta" className="bg-white/5 border-white/10 text-white text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Image URL</label>
+                <Input value={form.imageUrl} onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))}
+                  placeholder="/uploads/my-image.jpg" className="bg-white/5 border-white/10 text-white text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Name (English) *</label>
+                <Input value={form.nameEn} onChange={e => setForm(f => ({ ...f, nameEn: e.target.value }))}
+                  placeholder="Starters" className="bg-white/5 border-white/10 text-white text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Name (French)</label>
+                <Input value={form.nameFr} onChange={e => setForm(f => ({ ...f, nameFr: e.target.value }))}
+                  placeholder="Entrées" className="bg-white/5 border-white/10 text-white text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Name (Arabic)</label>
+                <Input value={form.nameAr} onChange={e => setForm(f => ({ ...f, nameAr: e.target.value }))}
+                  placeholder="المقبلات" className="bg-white/5 border-white/10 text-white text-sm" />
+              </div>
+            </div>
+            <div className="flex justify-end mt-4">
+              <Button onClick={handleCreate} disabled={creating}
+                className="bg-primary text-black hover:bg-primary/90 text-xs uppercase tracking-widest px-6">
+                {creating ? "Creating..." : "Create Category"}
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="space-y-2 mt-4">
+        {categories.map(cat => (
+          <div key={cat.id}
+            className="flex items-center justify-between px-4 py-3 bg-white/3 border border-white/5 rounded-sm hover:border-white/10 transition-all"
+          >
+            <div className="flex items-center gap-4 min-w-0">
+              {cat.imageUrl && (
+                <img src={cat.imageUrl} alt={cat.nameEn}
+                  className="w-10 h-10 object-cover rounded-sm opacity-80" />
+              )}
+              <div className="min-w-0">
+                <p className="text-sm text-white font-medium">{cat.nameEn}</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  <span className="text-gray-400">{cat.nameFr}</span>
+                  <span className="mx-2 text-gray-700">·</span>
+                  <span className="text-gray-400">{cat.nameAr}</span>
+                  <span className="mx-2 text-gray-700">·</span>
+                  <span className="text-gray-600">/{cat.slug}</span>
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              {confirmDelete === cat.id ? (
+                <>
+                  <button onClick={() => setConfirmDelete(null)}
+                    className="text-xs text-gray-400 hover:text-white px-2 py-1 border border-white/10 rounded-sm transition-all">
+                    Cancel
+                  </button>
+                  <button onClick={() => handleDelete(cat.id)} disabled={deletingId === cat.id}
+                    className="text-xs text-red-400 hover:text-red-300 px-2 py-1 border border-red-500/20 hover:border-red-500/40 rounded-sm transition-all">
+                    {deletingId === cat.id ? "Deleting..." : "Confirm Delete"}
+                  </button>
+                </>
+              ) : (
+                <button onClick={() => setConfirmDelete(cat.id)}
+                  className="text-gray-600 hover:text-red-400 transition-colors p-1.5">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+        {categories.length === 0 && (
+          <p className="text-gray-600 text-sm text-center py-8">No categories yet. Add one above.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── MENU ──────────────────────────────────────────────────────────────────────
 
 const EMPTY_NEW = { nameEn: "", nameFr: "", nameAr: "", description: "", price: "", imageUrl: "" };
 
-function MenuView({ items, onUpdated, toast }: { items: MenuItem[]; onUpdated: () => void; toast: any }) {
-  const [activeCategory, setActiveCategory] = useState("starters");
+function MenuView({ items, categories, onUpdated, toast }: { items: MenuItem[]; categories: Category[]; onUpdated: () => void; toast: any }) {
+  const catSlugs = categories.length > 0 ? categories.map(c => c.slug) : CATEGORY_ORDER;
+  const [activeCategory, setActiveCategory] = useState(catSlugs[0] || "starters");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<Partial<MenuItem>>({});
   const [saving, setSaving] = useState(false);
@@ -424,7 +598,7 @@ function MenuView({ items, onUpdated, toast }: { items: MenuItem[]; onUpdated: (
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
-  const grouped = CATEGORY_ORDER.reduce<Record<string, MenuItem[]>>((acc, cat) => {
+  const grouped = catSlugs.reduce<Record<string, MenuItem[]>>((acc, cat) => {
     acc[cat] = items.filter(i => i.category === cat).sort((a, b) => a.sortOrder - b.sortOrder);
     return acc;
   }, {});
@@ -527,23 +701,27 @@ function MenuView({ items, onUpdated, toast }: { items: MenuItem[]; onUpdated: (
       <p className="text-sm text-gray-400 mb-6 font-light">Edit dish names (EN / FR / AR), descriptions, prices, and images.</p>
 
       {/* Category Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-white/5 pb-4">
-        {CATEGORY_ORDER.map(cat => (
-          <button
-            key={cat}
-            onClick={() => { setActiveCategory(cat); cancelEdit(); setShowAdd(false); setNewForm({ ...EMPTY_NEW }); }}
-            className={`px-4 py-2 text-xs uppercase tracking-widest font-medium rounded-sm transition-all ${
-              activeCategory === cat
-                ? "bg-primary text-black"
-                : "text-gray-400 hover:text-white border border-white/10 hover:border-white/20"
-            }`}
-          >
-            {cat}
-            <span className={`ml-1.5 text-[10px] font-normal ${activeCategory === cat ? "text-black/60" : "text-gray-600"}`}>
-              {grouped[cat]?.length ?? 0}
-            </span>
-          </button>
-        ))}
+      <div className="flex flex-wrap gap-2 mb-6 border-b border-white/5 pb-4">
+        {catSlugs.map(cat => {
+          const catData = categories.find(c => c.slug === cat);
+          const label = catData?.nameEn || cat;
+          return (
+            <button
+              key={cat}
+              onClick={() => { setActiveCategory(cat); cancelEdit(); setShowAdd(false); setNewForm({ ...EMPTY_NEW }); }}
+              className={`px-4 py-2 text-xs uppercase tracking-widest font-medium rounded-sm transition-all ${
+                activeCategory === cat
+                  ? "bg-primary text-black"
+                  : "text-gray-400 hover:text-white border border-white/10 hover:border-white/20"
+              }`}
+            >
+              {label}
+              <span className={`ml-1.5 text-[10px] font-normal ${activeCategory === cat ? "text-black/60" : "text-gray-600"}`}>
+                {grouped[cat]?.length ?? 0}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Add New Item Form */}

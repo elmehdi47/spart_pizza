@@ -21,6 +21,17 @@ export const menuItems = pgTable("menu_items", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const menuCategories = pgTable("menu_categories", {
+  id: serial("id").primaryKey(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  nameEn: varchar("name_en", { length: 200 }).notNull(),
+  nameFr: varchar("name_fr", { length: 200 }).notNull(),
+  nameAr: varchar("name_ar", { length: 200 }).notNull(),
+  imageUrl: text("image_url"),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
   customerName: varchar("customer_name", { length: 255 }).notNull(),
