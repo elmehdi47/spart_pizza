@@ -37,11 +37,11 @@ export const translations = {
       submitRequest: "Submit Request"
     },
     experiences: {
-      privateDiningTitle: "Uncompromising Quality",
+      privateDiningTitle: "Pure Quality",
       privateDiningDesc: "Only the finest, freshest ingredients make it to our kitchen. We work with trusted local suppliers to guarantee every bite is crafted to the standard you deserve.",
-      chefsTableTitle: "Food Made with Passion",
+      chefsTableTitle: "Real Flavor",
       chefsTableDesc: "Every dish on our menu is built to impress. Bold flavors, perfect textures, generous portions — our kitchen team puts heart into every plate, every single time.",
-      sommelierTitle: "Service That Remembers You",
+      sommelierTitle: "True Care",
       sommelierDesc: "From the moment you walk in, you are our guest — not a table number. Our team is here to anticipate your needs, make you feel at home, and leave you wanting to return."
     },
     form: {
@@ -89,11 +89,11 @@ export const translations = {
       submitRequest: "Envoyer la Demande"
     },
     experiences: {
-      privateDiningTitle: "Qualité Irréprochable",
+      privateDiningTitle: "Pure Qualité",
       privateDiningDesc: "Seuls les ingrédients les plus frais et les plus fins entrent dans notre cuisine. Nous collaborons avec des fournisseurs locaux de confiance pour garantir une qualité à la hauteur de vos attentes, bouchée après bouchée.",
-      chefsTableTitle: "Une Cuisine avec Âme",
+      chefsTableTitle: "Vrai Goût",
       chefsTableDesc: "Chaque plat est conçu pour surprendre et ravir. Saveurs audacieuses, textures parfaites, générosité dans l'assiette — notre brigade met tout son cœur dans chaque préparation, sans exception.",
-      sommelierTitle: "Un Service Qui Vous Reconnaît",
+      sommelierTitle: "Vrai Soin",
       sommelierDesc: "Dès votre arrivée, vous êtes notre invité — pas un numéro de table. Notre équipe anticipe vos besoins, veille à votre confort et fait tout pour que vous ayez envie de revenir."
     },
     form: {
@@ -141,11 +141,11 @@ export const translations = {
       submitRequest: "إرسال الطلب"
     },
     experiences: {
-      privateDiningTitle: "جودة لا تُساوم",
+      privateDiningTitle: "جودة خالصة",
       privateDiningDesc: "فقط أجود المكوّنات وأطازجها تصل إلى مطبخنا. نتعاون مع موردين محليين موثوقين لنضمن لك جودة ترقى لتوقعاتك في كل لقمة وكل طبق.",
-      chefsTableTitle: "طعام يُصنع بشغف",
+      chefsTableTitle: "نكهة حقيقية",
       chefsTableDesc: "كل طبق في قائمتنا مصمَّم ليُبهر ويُسعد. نكهات جريئة، قوام مثالي، وكرم حقيقي في التقديم — فريقنا يضع قلبه في كل إعداد دون استثناء.",
-      sommelierTitle: "خدمة تتذكرك",
+      sommelierTitle: "اهتمام صادق",
       sommelierDesc: "منذ لحظة دخولك، أنت ضيفنا لا مجرد رقم طاولة. فريقنا هنا لاستباق احتياجاتك، ليجعلك تشعر بالراحة والترحاب، ويجعلك تشتاق للعودة."
     },
     form: {
