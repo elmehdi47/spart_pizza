@@ -425,23 +425,27 @@ function ImageUploadField({
 
 function CategoriesView({ categories, onUpdated, toast }: { categories: Category[]; onUpdated: () => void; toast: any }) {
   const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ slug: "", nameEn: "", nameFr: "", nameAr: "", imageUrl: "" });
+  const [form, setForm] = useState({ nameEn: "", nameFr: "", nameAr: "", imageUrl: "" });
   const [creating, setCreating] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   const API = (path: string) => `/api${path}`;
 
+  const toSlug = (name: string) =>
+    name.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+
   const handleCreate = async () => {
-    if (!form.slug.trim() || !form.nameEn.trim()) {
-      toast({ title: "Missing fields", description: "Slug and English name are required.", variant: "destructive" });
+    if (!form.nameEn.trim()) {
+      toast({ title: "Missing fields", description: "English name is required.", variant: "destructive" });
       return;
     }
+    const slug = toSlug(form.nameEn);
     setCreating(true);
     const res = await fetch(API("/admin/categories"), {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${sessionStorage.getItem("admin_token")}` },
-      body: JSON.stringify({ ...form }),
+      body: JSON.stringify({ slug, ...form }),
     });
     const data = await res.json();
     setCreating(false);
@@ -449,7 +453,7 @@ function CategoriesView({ categories, onUpdated, toast }: { categories: Category
       toast({ title: "Error", description: data.error || "Failed to create category", variant: "destructive" });
     } else {
       toast({ title: "Category created" });
-      setForm({ slug: "", nameEn: "", nameFr: "", nameAr: "", imageUrl: "" });
+      setForm({ nameEn: "", nameFr: "", nameAr: "", imageUrl: "" });
       setShowAdd(false);
       onUpdated();
     }
@@ -497,29 +501,32 @@ function CategoriesView({ categories, onUpdated, toast }: { categories: Category
             <p className="text-xs uppercase tracking-widest text-primary mb-4">New Category</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">Slug (URL key) *</label>
-                <Input value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
-                  placeholder="e.g. pasta" className="bg-white/5 border-white/10 text-white text-sm" />
-              </div>
-              <div>
-                <label className="text-xs text-gray-400 mb-1 block">Image URL</label>
-                <Input value={form.imageUrl} onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))}
-                  placeholder="/uploads/my-image.jpg" className="bg-white/5 border-white/10 text-white text-sm" />
-              </div>
-              <div>
                 <label className="text-xs text-gray-400 mb-1 block">Name (English) *</label>
                 <Input value={form.nameEn} onChange={e => setForm(f => ({ ...f, nameEn: e.target.value }))}
-                  placeholder="Starters" className="bg-white/5 border-white/10 text-white text-sm" />
+                  placeholder="e.g. Pasta" className="bg-white/5 border-white/10 text-white text-sm" />
+                {form.nameEn.trim() && (
+                  <p className="text-[10px] text-gray-600 mt-1">
+                    URL key: <span className="text-gray-500">{toSlug(form.nameEn)}</span>
+                  </p>
+                )}
               </div>
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">Name (French)</label>
                 <Input value={form.nameFr} onChange={e => setForm(f => ({ ...f, nameFr: e.target.value }))}
-                  placeholder="Entrées" className="bg-white/5 border-white/10 text-white text-sm" />
+                  placeholder="e.g. Pâtes" className="bg-white/5 border-white/10 text-white text-sm" />
               </div>
-              <div>
+              <div className="col-span-2">
                 <label className="text-xs text-gray-400 mb-1 block">Name (Arabic)</label>
                 <Input value={form.nameAr} onChange={e => setForm(f => ({ ...f, nameAr: e.target.value }))}
-                  placeholder="المقبلات" className="bg-white/5 border-white/10 text-white text-sm" />
+                  placeholder="e.g. معكرونة" className="bg-white/5 border-white/10 text-white text-sm" />
+              </div>
+              <div className="col-span-2">
+                <label className="text-xs text-gray-400 mb-1.5 block">Category Image</label>
+                <ImageUploadField
+                  value={form.imageUrl}
+                  onChange={url => setForm(f => ({ ...f, imageUrl: url }))}
+                  toast={toast}
+                />
               </div>
             </div>
             <div className="flex justify-end mt-4">
