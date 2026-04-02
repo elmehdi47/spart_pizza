@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { motion, useScroll, useTransform, AnimatePresence, useCycle } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Calendar, Clock, Users, ChevronRight, MapPin, Instagram, GlassWater, ChefHat, Utensils, Star, Navigation, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,7 +106,7 @@ export default function Home() {
       {/* Navbar */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          navScrolled || mobileMenuOpen ? "py-4 glass-panel border-b border-white/5" : "py-6 bg-transparent"
+          navScrolled ? "py-4 bg-black/90 backdrop-blur-md border-b border-white/5" : "py-6 bg-transparent"
         }`}
       >
         <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
@@ -147,49 +147,61 @@ export default function Home() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileMenuOpen(v => !v)}
-            className="md:hidden flex items-center justify-center w-10 h-10 text-gray-300 hover:text-primary transition-colors"
+            className="md:hidden flex items-center justify-center w-10 h-10 text-white"
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
-
-        {/* Mobile drawer */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="md:hidden overflow-hidden border-t border-white/5 bg-black/95 backdrop-blur-xl"
-            >
-              <div className="px-6 py-6 flex flex-col gap-1">
-                <a href="#menu" onClick={closeMobile} className="py-3 text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors border-b border-white/5">{t(language, "nav.menu")}</a>
-                <a href="#experience" onClick={closeMobile} className="py-3 text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors border-b border-white/5">{t(language, "nav.experience")}</a>
-                <a href="#about" onClick={closeMobile} className="py-3 text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors border-b border-white/5">{t(language, "nav.about")}</a>
-                <a href="#contact" onClick={closeMobile} className="py-3 text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors border-b border-white/5">{t(language, "nav.contact")}</a>
-
-                <div className="pt-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-sm tracking-widest font-medium">
-                    <button onClick={() => { setLanguage("en"); closeMobile(); }} className={`transition-colors ${language === "en" ? "text-primary" : "text-gray-500"}`}>EN</button>
-                    <span className="text-gray-700">|</span>
-                    <button onClick={() => { setLanguage("fr"); closeMobile(); }} className={`transition-colors ${language === "fr" ? "text-primary" : "text-gray-500"}`}>FR</button>
-                    <span className="text-gray-700">|</span>
-                    <button onClick={() => { setLanguage("ar"); closeMobile(); }} className={`transition-colors ${language === "ar" ? "text-primary" : "text-gray-500"}`}>AR</button>
-                  </div>
-                  <Link href={isAuthenticated ? "/admin" : "/login"} onClick={closeMobile}>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-widest font-medium text-gray-500 hover:text-primary border border-white/8 hover:border-primary/30 rounded-sm transition-all">
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                      {isAuthenticated ? "Admin" : "Login"}
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </header>
+
+      {/* Mobile full-screen overlay menu — outside header to avoid clipping */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 flex flex-col"
+          style={{ backgroundColor: "rgba(0,0,0,0.97)" }}
+        >
+          {/* Top bar matching the header height */}
+          <div className="h-[72px] shrink-0" />
+
+          {/* Menu content */}
+          <div className="flex-1 flex flex-col px-8 pt-4 pb-10">
+            <nav className="flex flex-col border-t border-white/10">
+              {[
+                { href: "#menu", label: t(language, "nav.menu") },
+                { href: "#experience", label: t(language, "nav.experience") },
+                { href: "#about", label: t(language, "nav.about") },
+                { href: "#contact", label: t(language, "nav.contact") },
+              ].map(({ href, label }) => (
+                <a
+                  key={href}
+                  href={href}
+                  onClick={closeMobile}
+                  className="py-5 text-lg font-serif text-gray-200 border-b border-white/5 hover:text-primary transition-colors"
+                >
+                  {label}
+                </a>
+              ))}
+            </nav>
+
+            <div className="mt-8 flex items-center justify-between">
+              <div className="flex items-center gap-4 text-sm tracking-widest font-medium">
+                <button onClick={() => { setLanguage("en"); closeMobile(); }} className={`uppercase ${language === "en" ? "text-primary" : "text-gray-500"}`}>EN</button>
+                <span className="text-gray-700">|</span>
+                <button onClick={() => { setLanguage("fr"); closeMobile(); }} className={`uppercase ${language === "fr" ? "text-primary" : "text-gray-500"}`}>FR</button>
+                <span className="text-gray-700">|</span>
+                <button onClick={() => { setLanguage("ar"); closeMobile(); }} className={`uppercase ${language === "ar" ? "text-primary" : "text-gray-500"}`}>AR</button>
+              </div>
+              <Link href={isAuthenticated ? "/admin" : "/login"} onClick={closeMobile}>
+                <button className="flex items-center gap-1.5 px-4 py-2 text-xs uppercase tracking-widest text-gray-400 border border-white/15 rounded-sm">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                  {isAuthenticated ? "Admin" : "Login"}
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
@@ -233,7 +245,7 @@ export default function Home() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5, duration: 1 }}
         >
-          <span className="text-xs uppercase tracking-widest text-gray-500">Scroll</span>
+          <span className="text-xs uppercase tracking-widest text-gray-500">Welcome</span>
           <div className="w-[1px] h-12 bg-gradient-to-b from-primary/50 to-transparent" />
         </motion.div>
       </section>
