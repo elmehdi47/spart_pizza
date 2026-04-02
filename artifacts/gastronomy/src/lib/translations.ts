@@ -25,9 +25,9 @@ export const translations = {
       menuTitle: "Our",
       menuTitleItalic: "Menu",
       menuSub: "Each dish is a masterpiece, crafted with precision, seasonal ingredients, and bound by culinary tradition.",
-      experienceTitle: "The",
-      experienceTitleItalic: "Experience",
-      experienceSub: "Beyond the dining room, Spart offers tailored experiences for those seeking deeper immersion into the culinary arts.",
+      experienceTitle: "Why",
+      experienceTitleItalic: "SPART",
+      experienceSub: "At SPART, every detail matters — from the first ingredient we source to the last smile at the door. We don't just serve food, we create moments you'll carry long after the meal ends.",
       aboutTitle: "Our",
       aboutTitleItalic: "Story",
       aboutQuote: "\"Cooking is not just about combining ingredients. It is about capturing a moment in time, an emotion, a memory, and presenting it on a plate.\"",
@@ -37,12 +37,12 @@ export const translations = {
       submitRequest: "Submit Request"
     },
     experiences: {
-      privateDiningTitle: "Private Dining",
-      privateDiningDesc: "An exclusive room for up to 12 guests, featuring a dedicated sommelier and a customized tasting menu.",
-      chefsTableTitle: "Chef's Table",
-      chefsTableDesc: "Sit front row to the kitchen action. Interact with our chef as he prepares an unscripted menu.",
-      sommelierTitle: "Sommelier Selection",
-      sommelierDesc: "A curated journey through our cellar, pairing rare vintages with our signature courses."
+      privateDiningTitle: "Uncompromising Quality",
+      privateDiningDesc: "Only the finest, freshest ingredients make it to our kitchen. We work with trusted local suppliers to guarantee every bite is crafted to the standard you deserve.",
+      chefsTableTitle: "Food Made with Passion",
+      chefsTableDesc: "Every dish on our menu is built to impress. Bold flavors, perfect textures, generous portions — our kitchen team puts heart into every plate, every single time.",
+      sommelierTitle: "Service That Remembers You",
+      sommelierDesc: "From the moment you walk in, you are our guest — not a table number. Our team is here to anticipate your needs, make you feel at home, and leave you wanting to return."
     },
     form: {
       name: "Name",
@@ -77,9 +77,9 @@ export const translations = {
       menuTitle: "Notre",
       menuTitleItalic: "Menu",
       menuSub: "Chaque plat est un chef-d'œuvre, élaboré avec précision, des ingrédients de saison et les traditions culinaires.",
-      experienceTitle: "L'",
-      experienceTitleItalic: "Expérience",
-      experienceSub: "Au-delà de la salle à manger, Spart propose des expériences sur mesure pour ceux qui cherchent une immersion plus profonde.",
+      experienceTitle: "Pourquoi",
+      experienceTitleItalic: "SPART",
+      experienceSub: "Chez SPART, chaque détail compte — du premier ingrédient à la dernière attention. Nous ne servons pas seulement à manger, nous créons des moments inoubliables que vous emporterez bien longtemps après votre repas.",
       aboutTitle: "Notre",
       aboutTitleItalic: "Histoire",
       aboutQuote: "\"Cuisiner n'est pas seulement combiner des ingrédients. C'est capturer un moment, une émotion, un souvenir et le présenter dans une assiette.\"",
@@ -89,12 +89,12 @@ export const translations = {
       submitRequest: "Envoyer la Demande"
     },
     experiences: {
-      privateDiningTitle: "Dîner Privé",
-      privateDiningDesc: "Une salle exclusive pour jusqu'à 12 convives, avec un sommelier dédié et un menu dégustation personnalisé.",
-      chefsTableTitle: "Table du Chef",
-      chefsTableDesc: "Assistez en première loge à l'action en cuisine. Interagissez avec notre chef.",
-      sommelierTitle: "Sélection Sommelier",
-      sommelierDesc: "Un voyage dans notre cave, accordant des vins rares avec nos plats signatures."
+      privateDiningTitle: "Qualité Irréprochable",
+      privateDiningDesc: "Seuls les ingrédients les plus frais et les plus fins entrent dans notre cuisine. Nous collaborons avec des fournisseurs locaux de confiance pour garantir une qualité à la hauteur de vos attentes, bouchée après bouchée.",
+      chefsTableTitle: "Une Cuisine avec Âme",
+      chefsTableDesc: "Chaque plat est conçu pour surprendre et ravir. Saveurs audacieuses, textures parfaites, générosité dans l'assiette — notre brigade met tout son cœur dans chaque préparation, sans exception.",
+      sommelierTitle: "Un Service Qui Vous Reconnaît",
+      sommelierDesc: "Dès votre arrivée, vous êtes notre invité — pas un numéro de table. Notre équipe anticipe vos besoins, veille à votre confort et fait tout pour que vous ayez envie de revenir."
     },
     form: {
       name: "Nom",
@@ -129,9 +129,9 @@ export const translations = {
       menuTitle: "قائمة",
       menuTitleItalic: "طعامنا",
       menuSub: "كل طبق تحفة فنية، مُعدّ بدقة من مكونات موسمية طازجة وفق أرقى التقاليد الطهوية.",
-      experienceTitle: "تجربة",
-      experienceTitleItalic: "لا تُنسى",
-      experienceSub: "خارج قاعة الطعام، يقدم سبارت تجارب مصممة لمن يسعون إلى غوص أعمق في عالم فنون الطهي.",
+      experienceTitle: "لماذا",
+      experienceTitleItalic: "سبارت",
+      experienceSub: "في سبارت، كل تفصيل يهم — من أول مكوّن نختاره إلى آخر ابتسامة عند الباب. نحن لا نقدم وجبات فحسب، بل نصنع لحظات ستبقى معك طويلاً بعد انتهاء وجبتك.",
       aboutTitle: "قصة",
       aboutTitleItalic: "سبارت",
       aboutQuote: "\"الطهي ليس مجرد خلط مكونات. إنه التقاط لحظة، عاطفة، ذكرى — وتقديمها على طبق.\"",
@@ -141,12 +141,12 @@ export const translations = {
       submitRequest: "إرسال الطلب"
     },
     experiences: {
-      privateDiningTitle: "طعام خاص",
-      privateDiningDesc: "قاعة حصرية لـ ١٢ ضيفاً مع خبير نبيذ مخصص وقائمة تذوق مصممة خصيصاً.",
-      chefsTableTitle: "طاولة الشيف",
-      chefsTableDesc: "اجلس في الصف الأول أمام المطبخ وتفاعل مع شيفنا أثناء إعداد قائمة مفاجئة.",
-      sommelierTitle: "اختيار الصومالييه",
-      sommelierDesc: "رحلة مختارة بعناية عبر قبونا، مع إقران مشروبات نادرة بأطباقنا الأساسية."
+      privateDiningTitle: "جودة لا تُساوم",
+      privateDiningDesc: "فقط أجود المكوّنات وأطازجها تصل إلى مطبخنا. نتعاون مع موردين محليين موثوقين لنضمن لك جودة ترقى لتوقعاتك في كل لقمة وكل طبق.",
+      chefsTableTitle: "طعام يُصنع بشغف",
+      chefsTableDesc: "كل طبق في قائمتنا مصمَّم ليُبهر ويُسعد. نكهات جريئة، قوام مثالي، وكرم حقيقي في التقديم — فريقنا يضع قلبه في كل إعداد دون استثناء.",
+      sommelierTitle: "خدمة تتذكرك",
+      sommelierDesc: "منذ لحظة دخولك، أنت ضيفنا لا مجرد رقم طاولة. فريقنا هنا لاستباق احتياجاتك، ليجعلك تشعر بالراحة والترحاب، ويجعلك تشتاق للعودة."
     },
     form: {
       name: "الاسم",

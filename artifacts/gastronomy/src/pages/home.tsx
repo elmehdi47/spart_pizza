@@ -351,9 +351,9 @@ export default function Home() {
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
             {[
-              { icon: Users, titleKey: "experiences.privateDiningTitle", descKey: "experiences.privateDiningDesc" },
+              { icon: Star, titleKey: "experiences.privateDiningTitle", descKey: "experiences.privateDiningDesc" },
               { icon: ChefHat, titleKey: "experiences.chefsTableTitle", descKey: "experiences.chefsTableDesc" },
-              { icon: GlassWater, titleKey: "experiences.sommelierTitle", descKey: "experiences.sommelierDesc" }
+              { icon: Users, titleKey: "experiences.sommelierTitle", descKey: "experiences.sommelierDesc" }
             ].map((exp, i) => (
               <motion.div
                 key={i}
