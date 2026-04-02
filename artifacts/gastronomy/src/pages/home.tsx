@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { Calendar, Clock, Users, ChevronRight, MapPin, Instagram, GlassWater, ChefHat, Utensils, Star, Navigation } from "lucide-react";
+import { motion, useScroll, useTransform, AnimatePresence, useCycle } from "framer-motion";
+import { Calendar, Clock, Users, ChevronRight, MapPin, Instagram, GlassWater, ChefHat, Utensils, Star, Navigation, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +32,9 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const closeMobile = () => setMobileMenuOpen(false);
 
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
@@ -85,45 +88,32 @@ export default function Home() {
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/30 selection:text-primary">
       
       {/* Navbar */}
-      <header 
+      <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          navScrolled ? "py-4 glass-panel border-b border-white/5" : "py-6 bg-transparent"
+          navScrolled || mobileMenuOpen ? "py-4 glass-panel border-b border-white/5" : "py-6 bg-transparent"
         }`}
       >
         <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity" onClick={closeMobile}>
             <img src="/spart-logo.jpg" alt="Spart" className="h-10 w-10 rounded-full object-cover" />
             <span className="text-xl font-serif font-bold tracking-widest text-white">SPART</span>
           </Link>
-          
+
+          {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8">
             <a href="#menu" className="text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors">{t(language, "nav.menu")}</a>
             <a href="#experience" className="text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors">{t(language, "nav.experience")}</a>
             <a href="#about" className="text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors">{t(language, "nav.about")}</a>
           </nav>
 
+          {/* Desktop right */}
           <div className="hidden md:flex items-center gap-4">
             <div className="flex items-center gap-2 text-sm tracking-widest font-medium">
-              <button
-                onClick={() => setLanguage("en")}
-                className={`transition-colors ${language === "en" ? "text-primary" : "text-gray-500 hover:text-white"}`}
-              >
-                EN
-              </button>
+              <button onClick={() => setLanguage("en")} className={`transition-colors ${language === "en" ? "text-primary" : "text-gray-500 hover:text-white"}`}>EN</button>
               <span className="text-gray-700">|</span>
-              <button
-                onClick={() => setLanguage("fr")}
-                className={`transition-colors ${language === "fr" ? "text-primary" : "text-gray-500 hover:text-white"}`}
-              >
-                FR
-              </button>
+              <button onClick={() => setLanguage("fr")} className={`transition-colors ${language === "fr" ? "text-primary" : "text-gray-500 hover:text-white"}`}>FR</button>
               <span className="text-gray-700">|</span>
-              <button
-                onClick={() => setLanguage("ar")}
-                className={`transition-colors ${language === "ar" ? "text-primary" : "text-gray-500 hover:text-white"}`}
-              >
-                AR
-              </button>
+              <button onClick={() => setLanguage("ar")} className={`transition-colors ${language === "ar" ? "text-primary" : "text-gray-500 hover:text-white"}`}>AR</button>
             </div>
             <a href="#contact">
               <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-none px-8 font-medium tracking-wide uppercase text-xs gold-glow">
@@ -132,12 +122,57 @@ export default function Home() {
             </a>
             <Link href={isAuthenticated ? "/admin" : "/login"}>
               <button className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-widest font-medium text-gray-500 hover:text-primary border border-white/8 hover:border-primary/30 rounded-sm transition-all duration-200">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                 {isAuthenticated ? "Admin" : "Login"}
               </button>
             </Link>
           </div>
+
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMobileMenuOpen(v => !v)}
+            className="md:hidden flex items-center justify-center w-10 h-10 text-gray-300 hover:text-primary transition-colors"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
+
+        {/* Mobile drawer */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="md:hidden overflow-hidden border-t border-white/5 bg-black/95 backdrop-blur-xl"
+            >
+              <div className="px-6 py-6 flex flex-col gap-1">
+                <a href="#menu" onClick={closeMobile} className="py-3 text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors border-b border-white/5">{t(language, "nav.menu")}</a>
+                <a href="#experience" onClick={closeMobile} className="py-3 text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors border-b border-white/5">{t(language, "nav.experience")}</a>
+                <a href="#about" onClick={closeMobile} className="py-3 text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors border-b border-white/5">{t(language, "nav.about")}</a>
+                <a href="#contact" onClick={closeMobile} className="py-3 text-sm tracking-widest uppercase text-gray-300 hover:text-primary transition-colors border-b border-white/5">{t(language, "nav.contact")}</a>
+
+                <div className="pt-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3 text-sm tracking-widest font-medium">
+                    <button onClick={() => { setLanguage("en"); closeMobile(); }} className={`transition-colors ${language === "en" ? "text-primary" : "text-gray-500"}`}>EN</button>
+                    <span className="text-gray-700">|</span>
+                    <button onClick={() => { setLanguage("fr"); closeMobile(); }} className={`transition-colors ${language === "fr" ? "text-primary" : "text-gray-500"}`}>FR</button>
+                    <span className="text-gray-700">|</span>
+                    <button onClick={() => { setLanguage("ar"); closeMobile(); }} className={`transition-colors ${language === "ar" ? "text-primary" : "text-gray-500"}`}>AR</button>
+                  </div>
+                  <Link href={isAuthenticated ? "/admin" : "/login"} onClick={closeMobile}>
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-widest font-medium text-gray-500 hover:text-primary border border-white/8 hover:border-primary/30 rounded-sm transition-all">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                      {isAuthenticated ? "Admin" : "Login"}
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Hero Section */}
