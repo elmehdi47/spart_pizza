@@ -33,15 +33,15 @@ export default function MenuCategory() {
 
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-black/95 backdrop-blur-xl border-b border-white/8">
-        <div className="px-6 md:px-12 py-4 flex items-center justify-between relative">
+        <div className="px-6 md:px-12 py-4 flex items-center gap-4 relative">
 
           {/* Back button — left */}
           <button
             onClick={handleBack}
-            className="group flex items-center gap-2 text-gray-400 hover:text-primary transition-colors duration-300"
+            className="group flex items-center gap-2 text-gray-400 hover:text-primary transition-colors duration-300 shrink-0"
           >
             <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
-            <span className="text-[11px] uppercase tracking-[0.18em] font-medium hidden sm:inline">
+            <span className="text-[11px] uppercase tracking-[0.18em] font-medium">
               {t(language, "navBack").replace("← ", "").replace(" ←", "")}
             </span>
           </button>
@@ -57,11 +57,6 @@ export default function MenuCategory() {
               <div className="w-6 h-[1px] bg-gradient-to-l from-transparent to-primary/50" />
             </div>
           </div>
-
-          {/* Current language badge — right */}
-          <span className="text-[10px] uppercase tracking-[0.25em] font-medium text-primary/70 border border-primary/20 px-2.5 py-1 rounded-sm">
-            {language}
-          </span>
         </div>
 
         {/* Thin gradient accent under the header */}

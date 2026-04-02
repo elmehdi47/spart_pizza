@@ -508,7 +508,6 @@ export default function Home() {
                 <img src="/spart-logo.jpg" alt="Spart" className="h-11 w-11 rounded-full object-cover" />
                 <div>
                   <p className="text-xl font-serif font-bold tracking-widest text-white">SPART</p>
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-primary/60">Fine Dining</p>
                 </div>
               </div>
               <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
