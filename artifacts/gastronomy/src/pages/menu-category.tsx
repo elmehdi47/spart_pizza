@@ -42,7 +42,7 @@ export default function MenuCategory() {
           >
             <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
             <span className="text-[11px] uppercase tracking-[0.18em] font-medium">
-              {t(language, "navBack").replace("← ", "").replace(" ←", "")}
+              Return
             </span>
           </button>
 
@@ -135,7 +135,7 @@ export default function MenuCategory() {
             className="group flex items-center gap-2 text-xs uppercase tracking-widest text-gray-500 hover:text-primary transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-            {t(language, "navBack").replace("← ", "").replace(" ←", "")}
+            Return
           </button>
 
           {/* Copyright */}
