@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useParams, useLocation } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Instagram, MapPin, Clock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { t } from "@/lib/translations";
 import { menuItems, menuCategories } from "@/lib/menuData";
@@ -117,33 +117,100 @@ export default function MenuCategory() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 bg-black/60 mt-8">
-        <div className="container mx-auto px-6 md:px-12 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+      <footer className="bg-[#060606] border-t border-white/5">
 
-          {/* Brand */}
-          <div className="flex items-center gap-3">
-            <img src="/spart-logo.jpg" alt="Spart" className="h-8 w-8 rounded-full object-cover opacity-80" />
-            <div>
-              <p className="text-sm font-serif font-semibold tracking-widest text-white/80">SPART</p>
-              <p className="text-[10px] uppercase tracking-widest text-gray-600">Bordj Bou Arreridj</p>
+        {/* Gradient top edge */}
+        <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+
+        <div className="container mx-auto px-6 md:px-12 pt-16 pb-10">
+
+          {/* Main grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 mb-16">
+
+            {/* Column 1 — Brand */}
+            <div className="flex flex-col gap-5">
+              <div className="flex items-center gap-3">
+                <img src="/spart-logo.jpg" alt="Spart" className="h-11 w-11 rounded-full object-cover" />
+                <div>
+                  <p className="text-xl font-serif font-bold tracking-widest text-white">SPART</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
+                Born in the heart of Bordj Bou Arreridj — a celebration of bold flavors, timeless craft, and Algerian warmth.
+              </p>
+              <a
+                href="https://www.instagram.com/spartepizza?igsh=MWNkOXZocWdjaWpodA=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2.5 text-xs uppercase tracking-widest text-gray-500 hover:text-primary transition-colors group w-fit"
+              >
+                <div className="w-8 h-8 rounded-full border border-white/10 group-hover:border-primary/40 flex items-center justify-center transition-colors">
+                  <Instagram className="w-3.5 h-3.5" />
+                </div>
+                @spartepizza
+              </a>
+            </div>
+
+            {/* Column 2 — Navigation */}
+            <div className="flex flex-col gap-5">
+              <h4 className="text-[10px] uppercase tracking-[0.3em] text-primary/70 font-medium">
+                Explore
+              </h4>
+              <nav className="flex flex-col gap-3">
+                {[
+                  { href: "/#menu", label: t(language, "nav.menu") },
+                  { href: "/#experience", label: t(language, "nav.experience") },
+                  { href: "/#about", label: t(language, "nav.about") },
+                  { href: "/#contact", label: t(language, "nav.contact") },
+                ].map(({ href, label }) => (
+                  <a
+                    key={href}
+                    href={href}
+                    className="text-sm text-gray-500 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <span className="w-4 h-[1px] bg-primary/40 group-hover:w-6 transition-all duration-300" />
+                    {label}
+                  </a>
+                ))}
+              </nav>
+            </div>
+
+            {/* Column 3 — Contact */}
+            <div className="flex flex-col gap-5">
+              <h4 className="text-[10px] uppercase tracking-[0.3em] text-primary/70 font-medium">
+                Find Us
+              </h4>
+              <div className="flex flex-col gap-4 text-sm text-gray-500">
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-4 h-4 text-primary/50 mt-0.5 shrink-0" />
+                  <span className="leading-relaxed">Station Mounia, Bd Remache Aissa,<br />Bordj Bou Arreridj 34000, Algeria</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <svg className="w-4 h-4 text-primary/50 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <a href="tel:0791943137" className="hover:text-white transition-colors">0791 943 137</a>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Clock className="w-4 h-4 text-primary/50 shrink-0" />
+                  <span>Open daily · 11:00 – 23:00</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Back to menu CTA */}
-          <button
-            onClick={handleBack}
-            className="group flex items-center gap-2 text-xs uppercase tracking-widest text-gray-500 hover:text-primary transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-            {t(language, "return")}
-          </button>
+          {/* Divider */}
+          <div className="h-px bg-white/5 mb-8" />
 
-          {/* Copyright */}
-          <p className="text-[10px] uppercase tracking-widest text-gray-700">
-            © {new Date().getFullYear()} Spart Restaurant
-          </p>
+          {/* Bottom bar */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-[10px] uppercase tracking-widest text-gray-700">
+            <span>© {new Date().getFullYear()} Spart Restaurant. All rights reserved.</span>
+            <div className="flex gap-6">
+              <a href="#" className="hover:text-gray-400 transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-gray-400 transition-colors">Terms of Service</a>
+            </div>
+          </div>
         </div>
-        <div className="h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
       </footer>
     </div>
   );
