@@ -1,5 +1,6 @@
 export const translations = {
   en: {
+    return: "Return",
     navBack: "← Back to Menu",
     ourMenu: "Our Menu",
     explore: "Explore →",
@@ -51,6 +52,7 @@ export const translations = {
     }
   },
   fr: {
+    return: "Retour",
     navBack: "← Retour au Menu",
     ourMenu: "Notre Menu",
     explore: "Explorer →",
@@ -102,6 +104,7 @@ export const translations = {
     }
   },
   ar: {
+    return: "رجوع",
     navBack: "← العودة للقائمة",
     ourMenu: "قائمتنا",
     explore: "استكشف ←",
