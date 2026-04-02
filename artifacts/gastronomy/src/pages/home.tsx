@@ -110,7 +110,14 @@ export default function Home() {
         }`}
       >
         <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity" onClick={closeMobile}>
+          <Link
+            href="/"
+            className="flex items-center gap-3 hover:opacity-90 transition-opacity"
+            onClick={() => {
+              closeMobile();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          >
             <img src="/spart-logo.jpg" alt="Spart" className="h-10 w-10 rounded-full object-cover" />
             <span className="text-xl font-serif font-bold tracking-widest text-white">SPART</span>
           </Link>

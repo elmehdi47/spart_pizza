@@ -32,32 +32,50 @@ export default function MenuCategory() {
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-primary/30 selection:text-primary">
 
       {/* Sticky Header */}
-      <header className="sticky top-0 z-50 py-5 px-6 md:px-12 flex items-center justify-between glass-panel border-b border-white/5">
+      <header className="sticky top-0 z-50 bg-black/95 backdrop-blur-xl border-b border-white/8">
+        <div className="px-6 md:px-12 py-4 flex items-center justify-between relative">
+
+          {/* Back button — left */}
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-widest font-medium border border-white/15 text-gray-300 hover:border-primary/50 hover:text-primary transition-all duration-300"
+            className="group flex items-center gap-2 text-gray-400 hover:text-primary transition-colors duration-300"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            {t(language, "navBack").replace("← ", "").replace(" ←", "")}
+            <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
+            <span className="text-[11px] uppercase tracking-[0.18em] font-medium hidden sm:inline">
+              {t(language, "navBack").replace("← ", "").replace(" ←", "")}
+            </span>
           </button>
 
-        <div className="text-xl md:text-2xl font-serif tracking-wide text-primary capitalize">
-          {categoryName}
+          {/* Category title — absolutely centred */}
+          <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none select-none">
+            <span className="text-[9px] uppercase tracking-[0.35em] text-primary/60 mb-1">SPART</span>
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-[1px] bg-gradient-to-r from-transparent to-primary/50" />
+              <h1 className="text-lg md:text-xl font-serif font-semibold text-white tracking-wide capitalize whitespace-nowrap">
+                {categoryName}
+              </h1>
+              <div className="w-6 h-[1px] bg-gradient-to-l from-transparent to-primary/50" />
+            </div>
+          </div>
+
+          {/* Language switcher — right */}
+          <div className="flex items-center gap-2 text-[11px] tracking-[0.18em] font-medium uppercase">
+            {(["en", "fr", "ar"] as const).map((lang, i, arr) => (
+              <span key={lang} className="flex items-center gap-2">
+                <button
+                  onClick={() => setLanguage(lang)}
+                  className={`transition-colors ${language === lang ? "text-primary" : "text-gray-500 hover:text-white"}`}
+                >
+                  {lang}
+                </button>
+                {i < arr.length - 1 && <span className="text-white/15">|</span>}
+              </span>
+            ))}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 text-sm tracking-widest font-medium">
-          {(["en", "fr", "ar"] as const).map((lang, i, arr) => (
-            <span key={lang} className="flex items-center gap-2">
-              <button
-                onClick={() => setLanguage(lang)}
-                className={`transition-colors uppercase ${language === lang ? "text-primary" : "text-gray-500 hover:text-white"}`}
-              >
-                {lang}
-              </button>
-              {i < arr.length - 1 && <span className="text-gray-700">|</span>}
-            </span>
-          ))}
-        </div>
+        {/* Thin gradient accent under the header */}
+        <div className="h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
       </header>
 
       {/* Menu Items */}
