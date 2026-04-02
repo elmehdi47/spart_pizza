@@ -77,6 +77,22 @@ export default function Home() {
   const heroOpacity = useTransform(scrollY, [0, 800], [1, 0]);
 
   useEffect(() => {
+    const scrollTo = sessionStorage.getItem("scrollTo");
+    if (scrollTo) {
+      sessionStorage.removeItem("scrollTo");
+      const tryScroll = (attempts = 0) => {
+        const el = document.getElementById(scrollTo);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        } else if (attempts < 10) {
+          setTimeout(() => tryScroll(attempts + 1), 100);
+        }
+      };
+      setTimeout(() => tryScroll(), 150);
+    }
+  }, []);
+
+  useEffect(() => {
     const handleScroll = () => {
       setNavScrolled(window.scrollY > 50);
     };
