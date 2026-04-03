@@ -227,11 +227,24 @@ adminRouter.get("/admin/orders", async (_req, res) => {
 
 adminRouter.post("/admin/orders", async (req, res) => {
   try {
-    const { customerName, customerEmail, customerPhone, message } = req.body as {
-      customerName: string; customerEmail: string; customerPhone?: string; message?: string;
+    const { customerName, customerEmail, customerPhone, message, items, totalPrice } = req.body as {
+      customerName: string;
+      customerEmail?: string;
+      customerPhone?: string;
+      message?: string;
+      items?: unknown[];
+      totalPrice?: string;
     };
-    if (!customerName || !customerEmail) return res.status(400).json({ error: "Name and email required" });
-    await db.insert(orders).values({ customerName, customerEmail, customerPhone, message, status: "pending" });
+    if (!customerName) return res.status(400).json({ error: "Customer name is required" });
+    await db.insert(orders).values({
+      customerName,
+      customerEmail: customerEmail || "n/a",
+      customerPhone,
+      message,
+      items: items ? JSON.stringify(items) : null,
+      totalPrice: totalPrice || null,
+      status: "pending",
+    });
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: "Failed to create order" });
@@ -242,7 +255,7 @@ adminRouter.put("/admin/orders/:id/status", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const { status } = req.body as { status: string };
-    if (!["pending", "confirmed", "cancelled"].includes(status)) return res.status(400).json({ error: "Invalid status" });
+    if (!["pending", "confirmed", "delivered", "cancelled"].includes(status)) return res.status(400).json({ error: "Invalid status" });
     await db.update(orders).set({ status, updatedAt: new Date() }).where(eq(orders.id, id));
     res.json({ ok: true });
   } catch (err) {

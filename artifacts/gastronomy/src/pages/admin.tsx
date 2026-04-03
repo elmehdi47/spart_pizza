@@ -21,9 +21,14 @@ type MenuItem = {
   description: string; price: string; imageUrl?: string;
   sortOrder: number;
 };
+type OrderItem = {
+  id: number; nameEn: string; nameFr: string; nameAr: string;
+  price: string; quantity: number;
+};
 type Order = {
   id: number; customerName: string; customerEmail: string;
   customerPhone?: string; message?: string; status: string;
+  items?: string; totalPrice?: string;
   createdAt: string;
 };
 type Category = {
@@ -41,9 +46,13 @@ const SLOT_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  confirmed: "bg-green-500/15 text-green-400 border-green-500/30",
-  cancelled: "bg-red-500/15 text-red-400 border-red-500/30",
+  pending:   "bg-amber-500/15  text-amber-400  border-amber-500/30",
+  confirmed: "bg-blue-500/15   text-blue-400   border-blue-500/30",
+  delivered: "bg-green-500/15  text-green-400  border-green-500/30",
+  cancelled: "bg-red-500/15    text-red-400    border-red-500/30",
+};
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Pending", confirmed: "Confirmed", delivered: "Delivered", cancelled: "Cancelled",
 };
 
 const CATEGORY_ORDER = ["starters", "mains", "desserts", "drinks"];
@@ -999,6 +1008,8 @@ function MenuView({ items, categories, onUpdated, toast }: { items: MenuItem[]; 
 
 function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: () => void; toast: any }) {
   const [updating, setUpdating] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const [filter, setFilter] = useState<string>("all");
 
   const updateStatus = async (id: number, status: string) => {
     setUpdating(id);
@@ -1009,7 +1020,7 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
         body: JSON.stringify({ status }),
       });
       if (!r.ok) throw new Error();
-      toast({ title: "Updated", description: `Order #${id} marked as ${status}.` });
+      toast({ title: "Status updated", description: `Order #${id} marked as ${STATUS_LABELS[status] || status}.` });
       onUpdated();
     } catch {
       toast({ title: "Error", description: "Failed to update order status.", variant: "destructive" });
@@ -1030,83 +1041,216 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
     setUpdating(null);
   };
 
+  const toggleExpand = (id: number) => {
+    setExpanded(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
   const formatDate = (iso: string) => {
     try {
       return new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
     } catch { return iso; }
   };
 
+  const parseItems = (raw?: string): OrderItem[] => {
+    if (!raw) return [];
+    try { return JSON.parse(raw) as OrderItem[]; } catch { return []; }
+  };
+
+  const filtered = filter === "all" ? orders : orders.filter(o => o.status === filter);
+  const counts = { all: orders.length, pending: 0, confirmed: 0, delivered: 0, cancelled: 0 };
+  orders.forEach(o => { if (o.status in counts) (counts as any)[o.status]++; });
+
   return (
     <div>
-      <h1 className="text-2xl font-serif text-white mb-2">Orders & Reservations</h1>
-      <p className="text-sm text-gray-400 mb-8 font-light">
-        Manage customer reservation requests submitted via the contact form.
-      </p>
+      <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-serif text-white mb-1">Orders</h1>
+          <p className="text-sm text-gray-500 font-light">
+            Customer orders placed through the menu. {orders.length} total.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {(["all", "pending", "confirmed", "delivered", "cancelled"] as const).map(s => (
+            <button
+              key={s}
+              onClick={() => setFilter(s)}
+              className={`text-xs uppercase tracking-widest px-3 py-1.5 rounded-sm border transition-all ${
+                filter === s
+                  ? "bg-primary/15 border-primary/40 text-primary"
+                  : "border-white/8 text-gray-500 hover:text-white hover:border-white/15"
+              }`}
+            >
+              {s === "all" ? "All" : STATUS_LABELS[s]}
+              <span className="ml-1.5 opacity-60">({(counts as any)[s]})</span>
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {orders.length === 0 ? (
+      {filtered.length === 0 ? (
         <div className="text-center py-20 text-gray-600">
           <ClipboardList className="w-12 h-12 mx-auto mb-4 opacity-30" />
-          <p className="text-sm uppercase tracking-widest">No orders yet</p>
-          <p className="text-xs mt-2 text-gray-700">Reservations submitted through the website will appear here.</p>
+          <p className="text-sm uppercase tracking-widest">No orders{filter !== "all" ? ` with status "${STATUS_LABELS[filter]}"` : ""}</p>
+          <p className="text-xs mt-2 text-gray-700">Orders placed by customers on the menu will appear here.</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {orders.map(order => (
-            <div
-              key={order.id}
-              className="bg-white/[0.025] border border-white/5 rounded-sm p-5"
-            >
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1 flex-wrap">
-                    <p className="font-serif text-white font-medium">{order.customerName}</p>
-                    <span className={`text-xs px-2 py-0.5 border rounded-sm ${STATUS_COLORS[order.status] || ""}`}>
-                      {order.status}
-                    </span>
-                    <span className="text-xs text-gray-600">#{order.id}</span>
+          {filtered.map(order => {
+            const orderItems = parseItems(order.items);
+            const isExpanded = expanded.has(order.id);
+            const hasItems = orderItems.length > 0;
+
+            return (
+              <div
+                key={order.id}
+                className="bg-white/[0.025] border border-white/6 rounded-sm overflow-hidden"
+              >
+                {/* Order Header Row */}
+                <div className="p-4 md:p-5">
+                  <div className="flex items-start gap-4 flex-wrap">
+
+                    {/* Left: customer info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1.5 flex-wrap">
+                        <span className={`text-[11px] font-semibold px-2.5 py-0.5 border rounded-sm uppercase tracking-wider ${STATUS_COLORS[order.status] || "border-white/10 text-gray-500"}`}>
+                          {STATUS_LABELS[order.status] || order.status}
+                        </span>
+                        <span className="text-[11px] text-gray-600 font-mono">#{order.id}</span>
+                        <span className="text-[11px] text-gray-600">{formatDate(order.createdAt)}</span>
+                      </div>
+
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <p className="font-serif text-white font-medium text-lg">{order.customerName}</p>
+                        {order.customerPhone && (
+                          <a
+                            href={`tel:${order.customerPhone}`}
+                            className="text-sm text-primary hover:text-primary/80 transition-colors font-medium"
+                          >
+                            {order.customerPhone}
+                          </a>
+                        )}
+                      </div>
+
+                      {order.totalPrice && (
+                        <p className="text-sm text-gray-400 mt-1">
+                          Total: <span className="text-primary font-semibold font-serif">{order.totalPrice}</span>
+                          {hasItems && (
+                            <span className="text-gray-600 ml-2">· {orderItems.reduce((s, i) => s + i.quantity, 0)} item{orderItems.reduce((s, i) => s + i.quantity, 0) !== 1 ? "s" : ""}</span>
+                          )}
+                        </p>
+                      )}
+
+                      {order.message && (
+                        <p className="text-sm text-gray-500 font-light mt-2 leading-relaxed border-l-2 border-white/8 pl-3 italic">
+                          "{order.message}"
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Right: action buttons */}
+                    <div className="flex flex-col gap-2 shrink-0">
+                      {/* Status actions */}
+                      <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                        {order.status === "pending" && (
+                          <button
+                            disabled={updating === order.id}
+                            onClick={() => updateStatus(order.id, "confirmed")}
+                            className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 border border-blue-500/25 hover:border-blue-500/50 px-3 py-1.5 rounded-sm transition-all"
+                          >
+                            <Check className="w-3 h-3" />
+                            Confirm
+                          </button>
+                        )}
+                        {order.status === "confirmed" && (
+                          <button
+                            disabled={updating === order.id}
+                            onClick={() => updateStatus(order.id, "delivered")}
+                            className="flex items-center gap-1 text-xs text-green-400 hover:text-green-300 border border-green-500/25 hover:border-green-500/50 px-3 py-1.5 rounded-sm transition-all"
+                          >
+                            <Check className="w-3 h-3" />
+                            Delivered
+                          </button>
+                        )}
+                        {order.status !== "cancelled" && order.status !== "delivered" && (
+                          <button
+                            disabled={updating === order.id}
+                            onClick={() => updateStatus(order.id, "cancelled")}
+                            className="flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 border border-amber-500/25 hover:border-amber-500/50 px-3 py-1.5 rounded-sm transition-all"
+                          >
+                            <X className="w-3 h-3" />
+                            Cancel
+                          </button>
+                        )}
+                        <button
+                          disabled={updating === order.id}
+                          onClick={() => deleteOrder(order.id)}
+                          className="flex items-center gap-1 text-xs text-red-400/70 hover:text-red-400 border border-red-500/15 hover:border-red-500/35 px-3 py-1.5 rounded-sm transition-all"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Delete
+                        </button>
+                      </div>
+
+                      {/* Expand items toggle */}
+                      {hasItems && (
+                        <button
+                          onClick={() => toggleExpand(order.id)}
+                          className="text-xs text-gray-500 hover:text-white transition-colors text-right"
+                        >
+                          {isExpanded ? "Hide items" : `Show ${orderItems.length} item${orderItems.length !== 1 ? "s" : ""}`}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-400 mb-0.5">{order.customerEmail}{order.customerPhone ? ` · ${order.customerPhone}` : ""}</p>
-                  <p className="text-xs text-gray-600">{formatDate(order.createdAt)}</p>
-                  {order.message && (
-                    <p className="text-sm text-gray-400 font-light mt-3 leading-relaxed border-l-2 border-white/10 pl-3">
-                      {order.message}
-                    </p>
-                  )}
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                  {order.status !== "confirmed" && (
-                    <button
-                      disabled={updating === order.id}
-                      onClick={() => updateStatus(order.id, "confirmed")}
-                      className="flex items-center gap-1.5 text-xs text-green-400 hover:text-green-300 border border-green-500/25 hover:border-green-500/50 px-3 py-1.5 rounded-sm transition-all"
+                {/* Expanded items table */}
+                <AnimatePresence>
+                  {isExpanded && hasItems && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden border-t border-white/5"
                     >
-                      <Check className="w-3 h-3" />
-                      Confirm
-                    </button>
+                      <div className="bg-black/20 px-5 py-4">
+                        <p className="text-[10px] uppercase tracking-[0.25em] text-gray-600 mb-3">Order Items</p>
+                        <div className="space-y-2">
+                          {orderItems.map((item, idx) => (
+                            <div key={idx} className="flex items-center justify-between gap-3 text-sm">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <span className="w-5 h-5 rounded-sm bg-white/5 border border-white/8 flex items-center justify-center text-[10px] text-gray-500 shrink-0">
+                                  {item.quantity}
+                                </span>
+                                <span className="text-gray-200 truncate">{item.nameEn}</span>
+                                {item.nameFr && item.nameFr !== item.nameEn && (
+                                  <span className="text-gray-600 text-xs truncate hidden sm:block">/ {item.nameFr}</span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3 shrink-0">
+                                <span className="text-gray-500 text-xs">{item.price} × {item.quantity}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        {order.totalPrice && (
+                          <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
+                            <span className="text-xs text-gray-600 uppercase tracking-widest">Total</span>
+                            <span className="font-serif text-primary font-semibold">{order.totalPrice}</span>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
                   )}
-                  {order.status !== "cancelled" && (
-                    <button
-                      disabled={updating === order.id}
-                      onClick={() => updateStatus(order.id, "cancelled")}
-                      className="flex items-center gap-1.5 text-xs text-amber-400 hover:text-amber-300 border border-amber-500/25 hover:border-amber-500/50 px-3 py-1.5 rounded-sm transition-all"
-                    >
-                      <X className="w-3 h-3" />
-                      Cancel
-                    </button>
-                  )}
-                  <button
-                    disabled={updating === order.id}
-                    onClick={() => deleteOrder(order.id)}
-                    className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 border border-red-500/25 hover:border-red-500/50 px-3 py-1.5 rounded-sm transition-all"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                    Delete
-                  </button>
-                </div>
+                </AnimatePresence>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

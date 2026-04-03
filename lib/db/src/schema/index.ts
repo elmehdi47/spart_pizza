@@ -38,6 +38,8 @@ export const orders = pgTable("orders", {
   customerEmail: varchar("customer_email", { length: 255 }).notNull(),
   customerPhone: varchar("customer_phone", { length: 50 }),
   message: text("message"),
+  items: text("items"),
+  totalPrice: varchar("total_price", { length: 100 }),
   status: varchar("status", { length: 50 }).default("pending"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

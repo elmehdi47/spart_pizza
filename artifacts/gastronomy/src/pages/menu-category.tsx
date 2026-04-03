@@ -1,9 +1,12 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useParams, useLocation } from "wouter";
-import { ArrowLeft, Instagram, MapPin, Clock } from "lucide-react";
+import { ArrowLeft, Instagram, MapPin, Clock, ShoppingBag, Plus, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCart } from "@/contexts/CartContext";
 import { t } from "@/lib/translations";
 import { useState, useEffect } from "react";
+import CartDrawer from "@/components/CartDrawer";
+import CheckoutModal from "@/components/CheckoutModal";
 
 type DbMenuItem = {
   id: number; nameEn: string; nameFr: string; nameAr: string;
@@ -23,12 +26,15 @@ const dishImagePositions = [
 
 export default function MenuCategory() {
   const { language } = useLanguage();
+  const { addItem, totalItems, items: cartItems, isOpen, setIsOpen } = useCart();
   const params = useParams();
   const [, navigate] = useLocation();
   const slug = params.slug as string;
 
   const [items, setItems] = useState<DbMenuItem[]>([]);
   const [categoryData, setCategoryData] = useState<DbCategory | null>(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [justAdded, setJustAdded] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     if (!slug) return;
@@ -52,6 +58,29 @@ export default function MenuCategory() {
     navigate("/");
   };
 
+  const handleAddToCart = (item: DbMenuItem) => {
+    addItem({
+      id: item.id,
+      nameEn: item.nameEn,
+      nameFr: item.nameFr,
+      nameAr: item.nameAr,
+      price: item.price,
+      imageUrl: item.imageUrl,
+    });
+    setJustAdded(prev => {
+      const next = new Set(prev);
+      next.add(item.id);
+      return next;
+    });
+    setTimeout(() => {
+      setJustAdded(prev => {
+        const next = new Set(prev);
+        next.delete(item.id);
+        return next;
+      });
+    }, 1200);
+  };
+
   const categoryName = categoryData
     ? (language === "fr" ? categoryData.nameFr : language === "ar" ? categoryData.nameAr : categoryData.nameEn)
     : t(language, `categories.${slug}`);
@@ -61,7 +90,7 @@ export default function MenuCategory() {
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-primary/30 selection:text-primary">
 
       {/* Sticky Header */}
-      <header className="sticky top-0 z-50 bg-black/95 backdrop-blur-xl border-b border-white/8">
+      <header className="sticky top-0 z-40 bg-black/95 backdrop-blur-xl border-b border-white/8">
         <div className="px-6 md:px-12 py-4 flex items-center gap-4 relative">
 
           {/* Back button — left */}
@@ -85,6 +114,30 @@ export default function MenuCategory() {
               </h1>
               <div className="w-6 h-[1px] bg-gradient-to-l from-transparent to-primary/50" />
             </div>
+          </div>
+
+          {/* Cart button — right */}
+          <div className="ml-auto shrink-0">
+            <button
+              onClick={() => setIsOpen(true)}
+              className="relative flex items-center gap-2 px-4 py-2 border border-white/10 hover:border-primary/40 rounded-sm text-gray-400 hover:text-white transition-all duration-200 group"
+            >
+              <ShoppingBag className="w-4 h-4 group-hover:text-primary transition-colors" />
+              <span className="text-[11px] uppercase tracking-widest hidden sm:block">Cart</span>
+              <AnimatePresence>
+                {totalItems > 0 && (
+                  <motion.span
+                    key="cart-count"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-black text-[10px] font-bold rounded-full flex items-center justify-center"
+                  >
+                    {totalItems}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
           </div>
         </div>
 
@@ -116,6 +169,8 @@ export default function MenuCategory() {
               : language === "ar" ? item.nameAr
               : item.nameEn;
             const itemImg = item.imageUrl || categoryImage;
+            const isInCart = cartItems.some(c => c.id === item.id);
+            const wasJustAdded = justAdded.has(item.id);
             return (
               <motion.div
                 key={item.id}
@@ -153,11 +208,62 @@ export default function MenuCategory() {
                   <p className="font-sans text-sm font-light text-gray-400 leading-relaxed">
                     {item.description}
                   </p>
+
+                  {/* Add to Cart button */}
+                  <button
+                    onClick={() => handleAddToCart(item)}
+                    className={`mt-1 flex items-center justify-center gap-2 w-full py-2.5 rounded-sm text-xs font-semibold uppercase tracking-widest transition-all duration-200 ${
+                      wasJustAdded
+                        ? "bg-green-500/15 border border-green-500/40 text-green-400"
+                        : isInCart
+                        ? "bg-primary/15 border border-primary/40 text-primary hover:bg-primary/25"
+                        : "bg-white/[0.04] border border-white/10 text-gray-400 hover:bg-primary/15 hover:border-primary/40 hover:text-primary"
+                    }`}
+                  >
+                    {wasJustAdded ? (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        Added
+                      </>
+                    ) : isInCart ? (
+                      <>
+                        <Plus className="w-3.5 h-3.5" />
+                        Add Again
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-3.5 h-3.5" />
+                        Add to Order
+                      </>
+                    )}
+                  </button>
                 </div>
               </motion.div>
             );
           })}
         </motion.div>
+
+        {/* Floating cart bar — shown when cart has items */}
+        <AnimatePresence>
+          {totalItems > 0 && (
+            <motion.div
+              initial={{ y: 80, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 80, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30"
+            >
+              <button
+                onClick={() => setIsOpen(true)}
+                className="flex items-center gap-4 bg-primary text-black font-bold text-sm px-6 py-3.5 rounded-sm shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:bg-primary/90 transition-colors"
+              >
+                <span className="bg-black/20 rounded-sm px-2 py-0.5 text-xs font-bold">{totalItems}</span>
+                <span className="uppercase tracking-widest">View Order</span>
+                <ShoppingBag className="w-4 h-4" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       {/* Footer */}
@@ -256,6 +362,12 @@ export default function MenuCategory() {
           </div>
         </div>
       </footer>
+
+      {/* Cart Drawer */}
+      <CartDrawer onCheckout={() => setCheckoutOpen(true)} />
+
+      {/* Checkout Modal */}
+      <CheckoutModal open={checkoutOpen} onClose={() => setCheckoutOpen(false)} />
     </div>
   );
 }
