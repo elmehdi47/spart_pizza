@@ -40,6 +40,7 @@ export default function Home() {
   const [apiCategories, setApiCategories] = useState<Array<{
     id: number; slug: string; nameEn: string; nameFr: string; nameAr: string; imageUrl?: string; sortOrder: number;
   }>>([]);
+  const [media, setMedia] = useState<Record<string, string>>({});
 
   const closeMobile = () => setMobileMenuOpen(false);
 
@@ -47,6 +48,16 @@ export default function Home() {
     fetch("/api/categories")
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setApiCategories(data); })
+      .catch(() => {});
+    fetch("/api/admin/media")
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const map: Record<string, string> = {};
+          data.forEach((item: { slot: string; imageUrl: string }) => { map[item.slot] = item.imageUrl; });
+          setMedia(map);
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -406,8 +417,8 @@ export default function Home() {
         <div className="flex flex-col lg:flex-row min-h-screen">
           <div className="w-full lg:w-1/2 relative h-[50vh] lg:h-auto">
             <img 
-              src="/chef.png" 
-              alt="Chef Marco Laurent" 
+              src={media["our-story"] || "/chef.png"} 
+              alt="Our Story" 
               className="absolute inset-0 w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/20 to-transparent lg:from-transparent lg:bg-black/20" />

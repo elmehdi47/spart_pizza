@@ -39,6 +39,7 @@ type Category = {
 
 const SLOT_LABELS: Record<string, string> = {
   hero: "Hero Banner",
+  "our-story": "Our Story Image",
   starters: "Starters Category",
   mains: "Mains Category",
   desserts: "Desserts Category",
