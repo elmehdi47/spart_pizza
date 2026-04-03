@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Calendar, Clock, Users, ChevronRight, MapPin, Instagram, GlassWater, ChefHat, Utensils, Star, Navigation, Menu, X } from "lucide-react";
+import { Calendar, Clock, Users, ChevronRight, MapPin, Instagram, GlassWater, ChefHat, Utensils, Star, Navigation, Menu, X, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { t } from "@/lib/translations";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
+import CartDrawer from "@/components/CartDrawer";
+import CheckoutModal from "@/components/CheckoutModal";
 
 // Animation Variants
 const fadeInUp = {
@@ -32,6 +35,8 @@ export default function Home() {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const { totalItems, setIsOpen: openCart } = useCart();
   const [apiCategories, setApiCategories] = useState<Array<{
     id: number; slug: string; nameEn: string; nameFr: string; nameAr: string; imageUrl?: string; sortOrder: number;
   }>>([]);
@@ -152,6 +157,19 @@ export default function Home() {
                 {t(language, "nav.contact")}
               </Button>
             </a>
+            {/* Cart button */}
+            <button
+              onClick={() => openCart(true)}
+              className="relative flex items-center gap-2 px-3 py-1.5 border border-white/8 hover:border-primary/40 rounded-sm text-gray-400 hover:text-white transition-all duration-200 group"
+            >
+              <ShoppingBag className="w-4 h-4 group-hover:text-primary transition-colors" />
+              {totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-black text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+
             <Link href={isAuthenticated ? "/admin" : "/login"}>
               <button className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-widest font-medium text-gray-500 hover:text-primary border border-white/8 hover:border-primary/30 rounded-sm transition-all duration-200">
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
@@ -208,12 +226,25 @@ export default function Home() {
                 <span className="text-gray-700">|</span>
                 <button onClick={() => { setLanguage("ar"); closeMobile(); }} className={`uppercase ${language === "ar" ? "text-primary" : "text-gray-500"}`}>AR</button>
               </div>
-              <Link href={isAuthenticated ? "/admin" : "/login"} onClick={closeMobile}>
-                <button className="flex items-center gap-1.5 px-4 py-2 text-xs uppercase tracking-widest text-gray-400 border border-white/15 rounded-sm">
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                  {isAuthenticated ? "Admin" : "Login"}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => { closeMobile(); openCart(true); }}
+                  className="relative flex items-center justify-center w-9 h-9 border border-white/15 rounded-sm text-gray-400"
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  {totalItems > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary text-black text-[9px] font-bold rounded-full flex items-center justify-center">
+                      {totalItems}
+                    </span>
+                  )}
                 </button>
-              </Link>
+                <Link href={isAuthenticated ? "/admin" : "/login"} onClick={closeMobile}>
+                  <button className="flex items-center gap-1.5 px-4 py-2 text-xs uppercase tracking-widest text-gray-400 border border-white/15 rounded-sm">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    {isAuthenticated ? "Admin" : "Login"}
+                  </button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -602,6 +633,13 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+
+      {/* Cart Drawer */}
+      <CartDrawer onCheckout={() => setCheckoutOpen(true)} />
+
+      {/* Checkout Modal */}
+      <CheckoutModal open={checkoutOpen} onClose={() => setCheckoutOpen(false)} />
 
     </div>
   );
