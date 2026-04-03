@@ -255,7 +255,7 @@ adminRouter.put("/admin/orders/:id/status", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const { status } = req.body as { status: string };
-    if (!["pending", "confirmed", "delivered", "cancelled"].includes(status)) return res.status(400).json({ error: "Invalid status" });
+    if (!["pending", "confirmed", "cancelled"].includes(status)) return res.status(400).json({ error: "Invalid status" });
     await db.update(orders).set({ status, updatedAt: new Date() }).where(eq(orders.id, id));
     res.json({ ok: true });
   } catch (err) {

@@ -48,11 +48,10 @@ const SLOT_LABELS: Record<string, string> = {
 const STATUS_COLORS: Record<string, string> = {
   pending:   "bg-amber-500/15  text-amber-400  border-amber-500/30",
   confirmed: "bg-blue-500/15   text-blue-400   border-blue-500/30",
-  delivered: "bg-green-500/15  text-green-400  border-green-500/30",
   cancelled: "bg-red-500/15    text-red-400    border-red-500/30",
 };
 const STATUS_LABELS: Record<string, string> = {
-  pending: "Pending", confirmed: "Confirmed", delivered: "Delivered", cancelled: "Cancelled",
+  pending: "Pending", confirmed: "Confirmed", cancelled: "Cancelled",
 };
 
 const CATEGORY_ORDER = ["starters", "mains", "desserts", "drinks"];
@@ -1009,7 +1008,6 @@ function MenuView({ items, categories, onUpdated, toast }: { items: MenuItem[]; 
 function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: () => void; toast: any }) {
   const [updating, setUpdating] = useState<number | null>(null);
   const [filter, setFilter] = useState<string>("all");
-  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   const updateStatus = async (id: number, status: string) => {
     setUpdating(id);
@@ -1028,20 +1026,6 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
     setUpdating(null);
   };
 
-  const deleteOrder = async (id: number) => {
-    setUpdating(id);
-    setConfirmDelete(null);
-    try {
-      const r = await fetch(API(`/admin/orders/${id}`), { method: "DELETE" });
-      if (!r.ok) throw new Error();
-      toast({ title: "Deleted", description: `Order #${id} removed.` });
-      onUpdated();
-    } catch {
-      toast({ title: "Error", description: "Failed to delete order.", variant: "destructive" });
-    }
-    setUpdating(null);
-  };
-
   const formatDate = (iso: string) => {
     try {
       const d = new Date(iso);
@@ -1056,12 +1040,9 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
     try { return JSON.parse(raw) as OrderItem[]; } catch { return []; }
   };
 
-  const STEPS = ["pending", "confirmed", "delivered"] as const;
-  const STEP_LABELS: Record<string, string> = { pending: "Pending", confirmed: "Confirmed", delivered: "Delivered" };
-
   const filtered = (filter === "all" ? orders : orders.filter(o => o.status === filter))
     .slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  const counts = { all: orders.length, pending: 0, confirmed: 0, delivered: 0, cancelled: 0 };
+  const counts = { all: orders.length, pending: 0, confirmed: 0, cancelled: 0 };
   orders.forEach(o => { if (o.status in counts) (counts as any)[o.status]++; });
 
   return (
@@ -1076,7 +1057,7 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
         </div>
         {/* Filter tabs */}
         <div className="flex items-center gap-2 flex-wrap">
-          {(["all", "pending", "confirmed", "delivered", "cancelled"] as const).map(s => (
+          {(["all", "pending", "confirmed", "cancelled"] as const).map(s => (
             <button
               key={s}
               onClick={() => setFilter(s)}
@@ -1123,7 +1104,6 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
                 <div className={`h-0.5 w-full ${
                   order.status === "pending"   ? "bg-amber-500/60" :
                   order.status === "confirmed" ? "bg-blue-500/60" :
-                  order.status === "delivered" ? "bg-green-500/60" :
                   "bg-red-500/30"
                 }`} />
 
@@ -1180,44 +1160,6 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
                         </div>
                       )}
 
-                      {/* Status flow (non-cancelled) */}
-                      {!isCancelled && (
-                        <div className="pt-1">
-                          <p className="text-[10px] uppercase tracking-[0.2em] text-gray-600 mb-2">Progress</p>
-                          <div className="flex items-center gap-0">
-                            {STEPS.map((step, i) => {
-                              const stepIdx = STEPS.indexOf(order.status as any);
-                              const isDone = i <= stepIdx && !isCancelled;
-                              const isCurrent = i === stepIdx;
-                              return (
-                                <div key={step} className="flex items-center">
-                                  <div className="flex flex-col items-center gap-1">
-                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                                      isDone
-                                        ? isCurrent
-                                          ? "border-primary bg-primary/20 text-primary"
-                                          : "border-primary/50 bg-primary/10 text-primary/70"
-                                        : "border-white/10 bg-transparent text-gray-700"
-                                    }`}>
-                                      {isDone && !isCurrent ? (
-                                        <Check className="w-3 h-3" />
-                                      ) : (
-                                        <div className={`w-2 h-2 rounded-full ${isDone ? "bg-primary" : "bg-white/10"}`} />
-                                      )}
-                                    </div>
-                                    <span className={`text-[9px] uppercase tracking-wider whitespace-nowrap ${
-                                      isCurrent ? "text-primary" : isDone ? "text-gray-500" : "text-gray-700"
-                                    }`}>{STEP_LABELS[step]}</span>
-                                  </div>
-                                  {i < STEPS.length - 1 && (
-                                    <div className={`h-px w-8 mb-4 mx-1 ${i < stepIdx ? "bg-primary/40" : "bg-white/8"}`} />
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     {/* Right: Order items */}
@@ -1274,68 +1216,28 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
                   </div>
 
                   {/* Row 3: Action buttons */}
-                  <div className="flex items-center gap-2 mt-5 pt-4 border-t border-white/5 flex-wrap">
-                    {order.status === "pending" && (
-                      <button
-                        disabled={isLoading}
-                        onClick={() => updateStatus(order.id, "confirmed")}
-                        className="flex items-center gap-1.5 text-xs text-blue-300 hover:text-blue-200 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 hover:border-blue-500/50 px-4 py-2 rounded-sm transition-all font-medium"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        Confirm Order
-                      </button>
-                    )}
-                    {order.status === "confirmed" && (
-                      <button
-                        disabled={isLoading}
-                        onClick={() => updateStatus(order.id, "delivered")}
-                        className="flex items-center gap-1.5 text-xs text-green-300 hover:text-green-200 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 hover:border-green-500/50 px-4 py-2 rounded-sm transition-all font-medium"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        Mark Delivered
-                      </button>
-                    )}
-                    {!isCancelled && order.status !== "delivered" && (
+                  {!isCancelled && (
+                    <div className="flex items-center gap-2 mt-5 pt-4 border-t border-white/5 flex-wrap">
+                      {order.status === "pending" && (
+                        <button
+                          disabled={isLoading}
+                          onClick={() => updateStatus(order.id, "confirmed")}
+                          className="flex items-center gap-1.5 text-xs text-blue-300 hover:text-blue-200 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 hover:border-blue-500/50 px-4 py-2 rounded-sm transition-all font-medium"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          Confirm Order
+                        </button>
+                      )}
                       <button
                         disabled={isLoading}
                         onClick={() => updateStatus(order.id, "cancelled")}
-                        className="flex items-center gap-1.5 text-xs text-amber-400/80 hover:text-amber-400 bg-amber-500/8 hover:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/40 px-4 py-2 rounded-sm transition-all"
+                        className="flex items-center gap-1.5 text-xs text-red-400/70 hover:text-red-400 bg-red-500/5 hover:bg-red-500/10 border border-red-500/15 hover:border-red-500/35 px-4 py-2 rounded-sm transition-all"
                       >
                         <X className="w-3.5 h-3.5" />
-                        Cancel
+                        Cancel Order
                       </button>
-                    )}
-
-                    <div className="flex-1" />
-
-                    {confirmDelete === order.id ? (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">Delete this order?</span>
-                        <button
-                          disabled={isLoading}
-                          onClick={() => deleteOrder(order.id)}
-                          className="text-xs text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 px-3 py-1.5 rounded-sm transition-all"
-                        >
-                          Yes, delete
-                        </button>
-                        <button
-                          onClick={() => setConfirmDelete(null)}
-                          className="text-xs text-gray-500 hover:text-white border border-white/8 px-3 py-1.5 rounded-sm transition-all"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        disabled={isLoading}
-                        onClick={() => setConfirmDelete(order.id)}
-                        className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-red-400 border border-white/5 hover:border-red-500/25 px-3 py-1.5 rounded-sm transition-all"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                        Delete
-                      </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             );
