@@ -1040,6 +1040,20 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
     try { return JSON.parse(raw) as OrderItem[]; } catch { return []; }
   };
 
+  // Returns the daily order number (resets at 5:00 AM every day).
+  const getDailyNumber = (order: Order): number => {
+    const toPeriodKey = (d: Date): string => {
+      const copy = new Date(d);
+      if (copy.getHours() < 5) copy.setDate(copy.getDate() - 1);
+      return `${copy.getFullYear()}-${copy.getMonth()}-${copy.getDate()}`;
+    };
+    const key = toPeriodKey(new Date(order.createdAt));
+    const sameDay = orders
+      .filter(o => toPeriodKey(new Date(o.createdAt)) === key)
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    return sameDay.findIndex(o => o.id === order.id) + 1;
+  };
+
   const filtered = orders.filter(o => o.status === filter)
     .slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   const counts = { pending: 0, confirmed: 0, cancelled: 0 };
@@ -1113,7 +1127,7 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
                     <span className={`text-[10px] font-bold px-2.5 py-1 border rounded-sm uppercase tracking-widest ${STATUS_COLORS[order.status] || "border-white/10 text-gray-500"}`}>
                       {STATUS_LABELS[order.status] || order.status}
                     </span>
-                    <span className="text-xs text-gray-600 font-mono">Order #{order.id}</span>
+                    <span className="text-xs text-gray-600 font-mono">Order #{getDailyNumber(order)}</span>
                     <span className="text-gray-700 text-xs">·</span>
                     <span className="text-xs text-gray-500">{date}</span>
                     <span className="text-xs text-gray-600">{time}</span>
