@@ -1008,8 +1008,8 @@ function MenuView({ items, categories, onUpdated, toast }: { items: MenuItem[]; 
 
 function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: () => void; toast: any }) {
   const [updating, setUpdating] = useState<number | null>(null);
-  const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [filter, setFilter] = useState<string>("all");
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   const updateStatus = async (id: number, status: string) => {
     setUpdating(id);
@@ -1020,7 +1020,7 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
         body: JSON.stringify({ status }),
       });
       if (!r.ok) throw new Error();
-      toast({ title: "Status updated", description: `Order #${id} marked as ${STATUS_LABELS[status] || status}.` });
+      toast({ title: "Status updated", description: `Order #${id} → ${STATUS_LABELS[status] || status}.` });
       onUpdated();
     } catch {
       toast({ title: "Error", description: "Failed to update order status.", variant: "destructive" });
@@ -1030,6 +1030,7 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
 
   const deleteOrder = async (id: number) => {
     setUpdating(id);
+    setConfirmDelete(null);
     try {
       const r = await fetch(API(`/admin/orders/${id}`), { method: "DELETE" });
       if (!r.ok) throw new Error();
@@ -1041,18 +1042,13 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
     setUpdating(null);
   };
 
-  const toggleExpand = (id: number) => {
-    setExpanded(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  };
-
   const formatDate = (iso: string) => {
     try {
-      return new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
-    } catch { return iso; }
+      const d = new Date(iso);
+      const date = d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+      const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+      return { date, time };
+    } catch { return { date: iso, time: "" }; }
   };
 
   const parseItems = (raw?: string): OrderItem[] => {
@@ -1060,19 +1056,25 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
     try { return JSON.parse(raw) as OrderItem[]; } catch { return []; }
   };
 
-  const filtered = filter === "all" ? orders : orders.filter(o => o.status === filter);
+  const STEPS = ["pending", "confirmed", "delivered"] as const;
+  const STEP_LABELS: Record<string, string> = { pending: "Pending", confirmed: "Confirmed", delivered: "Delivered" };
+
+  const filtered = (filter === "all" ? orders : orders.filter(o => o.status === filter))
+    .slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   const counts = { all: orders.length, pending: 0, confirmed: 0, delivered: 0, cancelled: 0 };
   orders.forEach(o => { if (o.status in counts) (counts as any)[o.status]++; });
 
   return (
     <div>
+      {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
         <div>
           <h1 className="text-2xl font-serif text-white mb-1">Orders</h1>
           <p className="text-sm text-gray-500 font-light">
-            Customer orders placed through the menu. {orders.length} total.
+            {orders.length} total order{orders.length !== 1 ? "s" : ""} — newest first.
           </p>
         </div>
+        {/* Filter tabs */}
         <div className="flex items-center gap-2 flex-wrap">
           {(["all", "pending", "confirmed", "delivered", "cancelled"] as const).map(s => (
             <button
@@ -1085,170 +1087,257 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
               }`}
             >
               {s === "all" ? "All" : STATUS_LABELS[s]}
-              <span className="ml-1.5 opacity-60">({(counts as any)[s]})</span>
+              <span className="ml-1.5 opacity-50">({(counts as any)[s]})</span>
             </button>
           ))}
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-20 text-gray-600">
-          <ClipboardList className="w-12 h-12 mx-auto mb-4 opacity-30" />
+        <div className="text-center py-24 text-gray-600">
+          <ClipboardList className="w-12 h-12 mx-auto mb-4 opacity-20" />
           <p className="text-sm uppercase tracking-widest">No orders{filter !== "all" ? ` with status "${STATUS_LABELS[filter]}"` : ""}</p>
           <p className="text-xs mt-2 text-gray-700">Orders placed by customers on the menu will appear here.</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {filtered.map(order => {
             const orderItems = parseItems(order.items);
-            const isExpanded = expanded.has(order.id);
-            const hasItems = orderItems.length > 0;
+            const totalQty = orderItems.reduce((s, i) => s + i.quantity, 0);
+            const { date, time } = formatDate(order.createdAt);
+            const isCancelled = order.status === "cancelled";
+            const isLoading = updating === order.id;
 
             return (
-              <div
+              <motion.div
                 key={order.id}
-                className="bg-white/[0.025] border border-white/6 rounded-sm overflow-hidden"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`border rounded-sm overflow-hidden ${
+                  isCancelled
+                    ? "bg-white/[0.012] border-white/5 opacity-60"
+                    : "bg-white/[0.03] border-white/8"
+                }`}
               >
-                {/* Order Header Row */}
-                <div className="p-4 md:p-5">
-                  <div className="flex items-start gap-4 flex-wrap">
+                {/* Top stripe: status color */}
+                <div className={`h-0.5 w-full ${
+                  order.status === "pending"   ? "bg-amber-500/60" :
+                  order.status === "confirmed" ? "bg-blue-500/60" :
+                  order.status === "delivered" ? "bg-green-500/60" :
+                  "bg-red-500/30"
+                }`} />
 
-                    {/* Left: customer info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-1.5 flex-wrap">
-                        <span className={`text-[11px] font-semibold px-2.5 py-0.5 border rounded-sm uppercase tracking-wider ${STATUS_COLORS[order.status] || "border-white/10 text-gray-500"}`}>
-                          {STATUS_LABELS[order.status] || order.status}
-                        </span>
-                        <span className="text-[11px] text-gray-600 font-mono">#{order.id}</span>
-                        <span className="text-[11px] text-gray-600">{formatDate(order.createdAt)}</span>
-                      </div>
+                <div className="p-5 md:p-6">
+                  {/* Row 1: order meta */}
+                  <div className="flex items-center gap-3 mb-4 flex-wrap">
+                    <span className={`text-[10px] font-bold px-2.5 py-1 border rounded-sm uppercase tracking-widest ${STATUS_COLORS[order.status] || "border-white/10 text-gray-500"}`}>
+                      {STATUS_LABELS[order.status] || order.status}
+                    </span>
+                    <span className="text-xs text-gray-600 font-mono">Order #{order.id}</span>
+                    <span className="text-gray-700 text-xs">·</span>
+                    <span className="text-xs text-gray-500">{date}</span>
+                    <span className="text-xs text-gray-600">{time}</span>
+                    {totalQty > 0 && (
+                      <>
+                        <span className="text-gray-700 text-xs">·</span>
+                        <span className="text-xs text-gray-500">{totalQty} item{totalQty !== 1 ? "s" : ""}</span>
+                      </>
+                    )}
+                    {order.totalPrice && (
+                      <>
+                        <span className="text-gray-700 text-xs">·</span>
+                        <span className="text-xs font-semibold text-primary font-serif">{order.totalPrice}</span>
+                      </>
+                    )}
+                  </div>
 
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <p className="font-serif text-white font-medium text-lg">{order.customerName}</p>
+                  {/* Row 2: two columns — customer | items */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                    {/* Left: Customer info */}
+                    <div className="space-y-3">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-gray-600">Customer</p>
+
+                      <div>
+                        <p className="text-xl font-serif text-white leading-tight">{order.customerName}</p>
                         {order.customerPhone && (
                           <a
                             href={`tel:${order.customerPhone}`}
-                            className="text-sm text-primary hover:text-primary/80 transition-colors font-medium"
+                            className="inline-flex items-center gap-2 mt-1.5 text-primary hover:text-primary/80 transition-colors font-medium text-base"
                           >
+                            <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
                             {order.customerPhone}
                           </a>
                         )}
                       </div>
 
-                      {order.totalPrice && (
-                        <p className="text-sm text-gray-400 mt-1">
-                          Total: <span className="text-primary font-semibold font-serif">{order.totalPrice}</span>
-                          {hasItems && (
-                            <span className="text-gray-600 ml-2">· {orderItems.reduce((s, i) => s + i.quantity, 0)} item{orderItems.reduce((s, i) => s + i.quantity, 0) !== 1 ? "s" : ""}</span>
-                          )}
-                        </p>
+                      {order.message && (
+                        <div className="bg-white/[0.03] border border-white/6 rounded-sm px-4 py-3">
+                          <p className="text-[10px] uppercase tracking-widest text-gray-600 mb-1.5">Note</p>
+                          <p className="text-sm text-gray-300 font-light leading-relaxed italic">"{order.message}"</p>
+                        </div>
                       )}
 
-                      {order.message && (
-                        <p className="text-sm text-gray-500 font-light mt-2 leading-relaxed border-l-2 border-white/8 pl-3 italic">
-                          "{order.message}"
-                        </p>
+                      {/* Status flow (non-cancelled) */}
+                      {!isCancelled && (
+                        <div className="pt-1">
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-gray-600 mb-2">Progress</p>
+                          <div className="flex items-center gap-0">
+                            {STEPS.map((step, i) => {
+                              const stepIdx = STEPS.indexOf(order.status as any);
+                              const isDone = i <= stepIdx && !isCancelled;
+                              const isCurrent = i === stepIdx;
+                              return (
+                                <div key={step} className="flex items-center">
+                                  <div className="flex flex-col items-center gap-1">
+                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                                      isDone
+                                        ? isCurrent
+                                          ? "border-primary bg-primary/20 text-primary"
+                                          : "border-primary/50 bg-primary/10 text-primary/70"
+                                        : "border-white/10 bg-transparent text-gray-700"
+                                    }`}>
+                                      {isDone && !isCurrent ? (
+                                        <Check className="w-3 h-3" />
+                                      ) : (
+                                        <div className={`w-2 h-2 rounded-full ${isDone ? "bg-primary" : "bg-white/10"}`} />
+                                      )}
+                                    </div>
+                                    <span className={`text-[9px] uppercase tracking-wider whitespace-nowrap ${
+                                      isCurrent ? "text-primary" : isDone ? "text-gray-500" : "text-gray-700"
+                                    }`}>{STEP_LABELS[step]}</span>
+                                  </div>
+                                  {i < STEPS.length - 1 && (
+                                    <div className={`h-px w-8 mb-4 mx-1 ${i < stepIdx ? "bg-primary/40" : "bg-white/8"}`} />
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
                       )}
                     </div>
 
-                    {/* Right: action buttons */}
-                    <div className="flex flex-col gap-2 shrink-0">
-                      {/* Status actions */}
-                      <div className="flex items-center gap-1.5 flex-wrap justify-end">
-                        {order.status === "pending" && (
-                          <button
-                            disabled={updating === order.id}
-                            onClick={() => updateStatus(order.id, "confirmed")}
-                            className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 border border-blue-500/25 hover:border-blue-500/50 px-3 py-1.5 rounded-sm transition-all"
-                          >
-                            <Check className="w-3 h-3" />
-                            Confirm
-                          </button>
-                        )}
-                        {order.status === "confirmed" && (
-                          <button
-                            disabled={updating === order.id}
-                            onClick={() => updateStatus(order.id, "delivered")}
-                            className="flex items-center gap-1 text-xs text-green-400 hover:text-green-300 border border-green-500/25 hover:border-green-500/50 px-3 py-1.5 rounded-sm transition-all"
-                          >
-                            <Check className="w-3 h-3" />
-                            Delivered
-                          </button>
-                        )}
-                        {order.status !== "cancelled" && order.status !== "delivered" && (
-                          <button
-                            disabled={updating === order.id}
-                            onClick={() => updateStatus(order.id, "cancelled")}
-                            className="flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 border border-amber-500/25 hover:border-amber-500/50 px-3 py-1.5 rounded-sm transition-all"
-                          >
-                            <X className="w-3 h-3" />
-                            Cancel
-                          </button>
-                        )}
-                        <button
-                          disabled={updating === order.id}
-                          onClick={() => deleteOrder(order.id)}
-                          className="flex items-center gap-1 text-xs text-red-400/70 hover:text-red-400 border border-red-500/15 hover:border-red-500/35 px-3 py-1.5 rounded-sm transition-all"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                          Delete
-                        </button>
-                      </div>
-
-                      {/* Expand items toggle */}
-                      {hasItems && (
-                        <button
-                          onClick={() => toggleExpand(order.id)}
-                          className="text-xs text-gray-500 hover:text-white transition-colors text-right"
-                        >
-                          {isExpanded ? "Hide items" : `Show ${orderItems.length} item${orderItems.length !== 1 ? "s" : ""}`}
-                        </button>
+                    {/* Right: Order items */}
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-gray-600 mb-3">
+                        {orderItems.length > 0 ? "Items Ordered" : "No items recorded"}
+                      </p>
+                      {orderItems.length > 0 ? (
+                        <div className="bg-black/20 border border-white/5 rounded-sm overflow-hidden">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b border-white/5">
+                                <th className="text-left px-4 py-2 text-[10px] uppercase tracking-widest text-gray-600 font-normal">Item</th>
+                                <th className="text-center px-3 py-2 text-[10px] uppercase tracking-widest text-gray-600 font-normal w-12">Qty</th>
+                                <th className="text-right px-4 py-2 text-[10px] uppercase tracking-widest text-gray-600 font-normal">Price</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/4">
+                              {orderItems.map((item, idx) => (
+                                <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
+                                  <td className="px-4 py-2.5">
+                                    <p className="text-gray-200 font-medium leading-tight">{item.nameEn}</p>
+                                    {item.nameFr && item.nameFr !== item.nameEn && (
+                                      <p className="text-gray-600 text-xs">{item.nameFr}</p>
+                                    )}
+                                  </td>
+                                  <td className="px-3 py-2.5 text-center">
+                                    <span className="inline-flex items-center justify-center w-6 h-6 bg-white/6 border border-white/8 rounded-sm text-xs text-gray-300 font-medium">
+                                      {item.quantity}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-2.5 text-right text-gray-400 text-xs whitespace-nowrap">
+                                    {item.price}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                            {order.totalPrice && (
+                              <tfoot>
+                                <tr className="border-t border-white/8 bg-white/[0.02]">
+                                  <td colSpan={2} className="px-4 py-3 text-xs uppercase tracking-widest text-gray-600">Total</td>
+                                  <td className="px-4 py-3 text-right font-serif font-semibold text-primary text-base">{order.totalPrice}</td>
+                                </tr>
+                              </tfoot>
+                            )}
+                          </table>
+                        </div>
+                      ) : (
+                        <div className="bg-black/10 border border-white/4 rounded-sm px-4 py-6 text-center">
+                          <p className="text-xs text-gray-700">No item details saved with this order.</p>
+                        </div>
                       )}
                     </div>
                   </div>
-                </div>
 
-                {/* Expanded items table */}
-                <AnimatePresence>
-                  {isExpanded && hasItems && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden border-t border-white/5"
-                    >
-                      <div className="bg-black/20 px-5 py-4">
-                        <p className="text-[10px] uppercase tracking-[0.25em] text-gray-600 mb-3">Order Items</p>
-                        <div className="space-y-2">
-                          {orderItems.map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between gap-3 text-sm">
-                              <div className="flex items-center gap-3 min-w-0">
-                                <span className="w-5 h-5 rounded-sm bg-white/5 border border-white/8 flex items-center justify-center text-[10px] text-gray-500 shrink-0">
-                                  {item.quantity}
-                                </span>
-                                <span className="text-gray-200 truncate">{item.nameEn}</span>
-                                {item.nameFr && item.nameFr !== item.nameEn && (
-                                  <span className="text-gray-600 text-xs truncate hidden sm:block">/ {item.nameFr}</span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-3 shrink-0">
-                                <span className="text-gray-500 text-xs">{item.price} × {item.quantity}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        {order.totalPrice && (
-                          <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
-                            <span className="text-xs text-gray-600 uppercase tracking-widest">Total</span>
-                            <span className="font-serif text-primary font-semibold">{order.totalPrice}</span>
-                          </div>
-                        )}
+                  {/* Row 3: Action buttons */}
+                  <div className="flex items-center gap-2 mt-5 pt-4 border-t border-white/5 flex-wrap">
+                    {order.status === "pending" && (
+                      <button
+                        disabled={isLoading}
+                        onClick={() => updateStatus(order.id, "confirmed")}
+                        className="flex items-center gap-1.5 text-xs text-blue-300 hover:text-blue-200 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 hover:border-blue-500/50 px-4 py-2 rounded-sm transition-all font-medium"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        Confirm Order
+                      </button>
+                    )}
+                    {order.status === "confirmed" && (
+                      <button
+                        disabled={isLoading}
+                        onClick={() => updateStatus(order.id, "delivered")}
+                        className="flex items-center gap-1.5 text-xs text-green-300 hover:text-green-200 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 hover:border-green-500/50 px-4 py-2 rounded-sm transition-all font-medium"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        Mark Delivered
+                      </button>
+                    )}
+                    {!isCancelled && order.status !== "delivered" && (
+                      <button
+                        disabled={isLoading}
+                        onClick={() => updateStatus(order.id, "cancelled")}
+                        className="flex items-center gap-1.5 text-xs text-amber-400/80 hover:text-amber-400 bg-amber-500/8 hover:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/40 px-4 py-2 rounded-sm transition-all"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        Cancel
+                      </button>
+                    )}
+
+                    <div className="flex-1" />
+
+                    {confirmDelete === order.id ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">Delete this order?</span>
+                        <button
+                          disabled={isLoading}
+                          onClick={() => deleteOrder(order.id)}
+                          className="text-xs text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 px-3 py-1.5 rounded-sm transition-all"
+                        >
+                          Yes, delete
+                        </button>
+                        <button
+                          onClick={() => setConfirmDelete(null)}
+                          className="text-xs text-gray-500 hover:text-white border border-white/8 px-3 py-1.5 rounded-sm transition-all"
+                        >
+                          Cancel
+                        </button>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                    ) : (
+                      <button
+                        disabled={isLoading}
+                        onClick={() => setConfirmDelete(order.id)}
+                        className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-red-400 border border-white/5 hover:border-red-500/25 px-3 py-1.5 rounded-sm transition-all"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
             );
           })}
         </div>
