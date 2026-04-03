@@ -243,27 +243,6 @@ export default function MenuCategory() {
           })}
         </motion.div>
 
-        {/* Floating cart bar — shown when cart has items */}
-        <AnimatePresence>
-          {totalItems > 0 && (
-            <motion.div
-              initial={{ y: 80, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 80, opacity: 0 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30"
-            >
-              <button
-                onClick={() => setIsOpen(true)}
-                className="flex items-center gap-4 bg-primary text-black font-bold text-sm px-6 py-3.5 rounded-sm shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:bg-primary/90 transition-colors"
-              >
-                <span className="bg-black/20 rounded-sm px-2 py-0.5 text-xs font-bold">{totalItems}</span>
-                <span className="uppercase tracking-widest">View Order</span>
-                <ShoppingBag className="w-4 h-4" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </main>
 
       {/* Footer */}
