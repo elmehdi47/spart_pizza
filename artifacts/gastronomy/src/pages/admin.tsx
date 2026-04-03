@@ -1007,7 +1007,7 @@ function MenuView({ items, categories, onUpdated, toast }: { items: MenuItem[]; 
 
 function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: () => void; toast: any }) {
   const [updating, setUpdating] = useState<number | null>(null);
-  const [filter, setFilter] = useState<string>("all");
+  const [filter, setFilter] = useState<string>("pending");
 
   const updateStatus = async (id: number, status: string) => {
     setUpdating(id);
@@ -1040,9 +1040,9 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
     try { return JSON.parse(raw) as OrderItem[]; } catch { return []; }
   };
 
-  const filtered = (filter === "all" ? orders : orders.filter(o => o.status === filter))
+  const filtered = orders.filter(o => o.status === filter)
     .slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  const counts = { all: orders.length, pending: 0, confirmed: 0, cancelled: 0 };
+  const counts = { pending: 0, confirmed: 0, cancelled: 0 };
   orders.forEach(o => { if (o.status in counts) (counts as any)[o.status]++; });
 
   return (
@@ -1057,7 +1057,7 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
         </div>
         {/* Filter tabs */}
         <div className="flex items-center gap-2 flex-wrap">
-          {(["all", "pending", "confirmed", "cancelled"] as const).map(s => (
+          {(["pending", "confirmed", "cancelled"] as const).map(s => (
             <button
               key={s}
               onClick={() => setFilter(s)}
@@ -1067,7 +1067,7 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
                   : "border-white/8 text-gray-500 hover:text-white hover:border-white/15"
               }`}
             >
-              {s === "all" ? "All" : STATUS_LABELS[s]}
+              {STATUS_LABELS[s]}
               <span className="ml-1.5 opacity-50">({(counts as any)[s]})</span>
             </button>
           ))}
@@ -1215,19 +1215,17 @@ function OrdersView({ orders, onUpdated, toast }: { orders: Order[]; onUpdated: 
                     </div>
                   </div>
 
-                  {/* Row 3: Action buttons */}
-                  {!isCancelled && (
-                    <div className="flex items-center gap-2 mt-5 pt-4 border-t border-white/5 flex-wrap">
-                      {order.status === "pending" && (
-                        <button
-                          disabled={isLoading}
-                          onClick={() => updateStatus(order.id, "confirmed")}
-                          className="flex items-center gap-1.5 text-xs text-blue-300 hover:text-blue-200 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 hover:border-blue-500/50 px-4 py-2 rounded-sm transition-all font-medium"
-                        >
-                          <Check className="w-3.5 h-3.5" />
-                          Confirm Order
-                        </button>
-                      )}
+                  {/* Row 3: Action buttons — only for pending orders */}
+                  {order.status === "pending" && (
+                    <div className="flex items-center gap-2 mt-5 pt-4 border-t border-white/5">
+                      <button
+                        disabled={isLoading}
+                        onClick={() => updateStatus(order.id, "confirmed")}
+                        className="flex items-center gap-1.5 text-xs text-blue-300 hover:text-blue-200 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 hover:border-blue-500/50 px-4 py-2 rounded-sm transition-all font-medium"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        Confirm Order
+                      </button>
                       <button
                         disabled={isLoading}
                         onClick={() => updateStatus(order.id, "cancelled")}
