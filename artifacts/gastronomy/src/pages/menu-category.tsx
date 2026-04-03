@@ -6,7 +6,6 @@ import { useCart } from "@/contexts/CartContext";
 import { t } from "@/lib/translations";
 import { useState, useEffect } from "react";
 import CartDrawer from "@/components/CartDrawer";
-import CheckoutModal from "@/components/CheckoutModal";
 
 type DbMenuItem = {
   id: number; nameEn: string; nameFr: string; nameAr: string;
@@ -33,7 +32,6 @@ export default function MenuCategory() {
 
   const [items, setItems] = useState<DbMenuItem[]>([]);
   const [categoryData, setCategoryData] = useState<DbCategory | null>(null);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [justAdded, setJustAdded] = useState<Set<number>>(new Set());
 
   useEffect(() => {
@@ -363,11 +361,8 @@ export default function MenuCategory() {
         </div>
       </footer>
 
-      {/* Cart Drawer */}
-      <CartDrawer onCheckout={() => setCheckoutOpen(true)} />
-
-      {/* Checkout Modal */}
-      <CheckoutModal open={checkoutOpen} onClose={() => setCheckoutOpen(false)} />
+      {/* Cart Drawer — includes checkout form inline */}
+      <CartDrawer />
     </div>
   );
 }
